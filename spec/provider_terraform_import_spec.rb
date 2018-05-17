@@ -34,11 +34,12 @@ describe Provider::Terraform do
 
     describe '#import_id_formats' do
       subject do
-        provider.import_id_formats(
+        resource =
           resource(
             'base_url: "projects/{{project}}/regions/{{region}}/subnetworks"'
           )
-        )
+        resource.instance_variable_set('@__product', product)
+        provider.import_id_formats resource
       end
 
       it do
@@ -46,6 +47,28 @@ describe Provider::Terraform do
           'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}',
           '{{project}}/{{region}}/{{name}}',
           '{{name}}'
+        )
+      end
+    end
+
+    describe '#import_id_formats with explicit self link' do
+      subject do
+        resource =
+          resource(
+            'base_url: "projects/{{project}}/regions/{{region}}/subnetworks"',
+            'self_link: "projects/{{project}}/regions/{{region}}/subnetworks/'\
+                        '{{somethingElse}}"'
+          )
+        resource.instance_variable_set('@__product', product)
+        provider.import_id_formats resource
+      end
+
+      it do
+        is_expected.to contain_exactly(
+          'projects/{{project}}/regions/{{region}}/subnetworks/'\
+            '{{something_else}}',
+          '{{project}}/{{region}}/{{something_else}}',
+          '{{something_else}}'
         )
       end
     end
