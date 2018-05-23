@@ -168,6 +168,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
   InstanceTemplate: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   InterconnectAttachment: !ruby/object:Provider::Terraform::ResourceOverride
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
     examples: |
       ```hcl
       resource "google_compute_interconnect_attachment" "default" {
