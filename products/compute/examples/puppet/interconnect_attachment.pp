@@ -12,27 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
-<% if name != "README.md" -%>
+<% unless name == "README.md" -%>
 <%= compile 'templates/license.erb' -%>
 
 <%= lines(autogen_notice :puppet) -%>
 
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
+<% end # name == README.md -%>
 gcompute_region { 'us-central1':
   project    => 'google.com:graphite-playground',
   credential => 'mycred',
 }
 
-<% else -%>
-# Tip: Be sure to include a valid gcompute_disk object
-<% end # name == README.md -%>
 gcompute_interconnect_attachment { <%= example_resource_name('test-attachment') -%>:
   ensure       => present,
-  region       => 'us-central1'
+  region       => 'us-central1',
+  name         => <%= example_resource_name('test-attachment') -%>,
+  interconnect => 'https://googleapis.com/compute/v1/projects/...global/interconnects/...',
+  router       => 'https://googleapis.com/compute/v1/projects/...regions/.../routers/...',
   project      => 'google.com:graphite-playground',
-  name         => '<%= example_resource_name('test-attachment') -%>'
-  interconnect => 'https://googleapis.com/compute/v1/projects/...global/interconnects/...'
-  router       => 'https://googleapis.com/compute/v1/projects/...regions/.../routers/...'
-  credential   => 'mycred'
+  credential   => 'mycred',
 }
