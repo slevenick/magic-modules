@@ -1980,6 +1980,14 @@ objects:
       Represents an InterconnectAttachment (VLAN attachment) resource. For more
       information, see Creating VLAN Attachments.
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'selfLink'
+        required: true
+        description: |
+          Region where the regional interconnect attachment resides.
     properties:
       - !ruby/object:Api::Type::String 
         name: 'cloudRouterIpAddress'
@@ -2036,12 +2044,6 @@ objects:
           automatically connect the Interconnect to the network & region within which the
           Cloud Router is configured.
         required: true
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'region'
-        resource: 'Region'
-        imports: 'selfLink'
-        description: |
-          Region where the regional interconnect attachment resides.
       - !ruby/object:Api::Type::Time 
         name: 'creationTimestamp'
         description: |
