@@ -341,7 +341,7 @@ module Provider
                  #             'foo',
                  #             'bar
                  #           ].join('/'),
-                 ['['] + 
+                 ['['] +
                  vars_parts.each_slice((vars_parts.size / 2.0).round).to_a
                    .map { |p| indent(quote_string(p.join('/')) + ',', 2) } +
                  ["].join('/'),"]
