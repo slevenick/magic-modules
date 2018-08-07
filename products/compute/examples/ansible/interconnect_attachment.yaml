@@ -14,22 +14,21 @@
 task:
     !ruby/object:Provider::Ansible::Task
     name: gcp_compute_interconnect_attachment
-    code: |
-      name: <%= ctx[:name] %>
-      region: us-central1
-      project: <%= ctx[:project] %>
-      auth_kind: <%= ctx[:auth_kind] %>
-      interconnect: 'https://googleapis.com/compute/v1/projects/<%=ctx[:project]%>/global/interconnects/...'
-      router: 'https://googleapis.com/compute/v1/projects/<%=ctx[:project]%>/regions/us-central1/routers/...'
-      service_account_file: <%= ctx[:service_account_file] %>
+    code:
+        name: <%= ctx[:name] %>
+        region: us-central1
+        project: <%= ctx[:project] %>
+        auth_kind: <%= ctx[:auth_kind] %>
+        interconnect: 'https://googleapis.com/compute/v1/projects/<%=ctx[:project]%>/global/interconnects/...'
+        router: 'https://googleapis.com/compute/v1/projects/<%=ctx[:project]%>/regions/us-central1/routers/...'
+        service_account_file: <%= ctx[:service_account_file] %>
     register: disk
 verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud compute interconnects attachments describe
-      "{{ resource_name }}"
-      --project="{{ gcp_project}}"
-      --region="{{ gcp_region}}"
-  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
-    region: global
-    type: images
-
+    command: |
+        gcloud compute interconnects attachments describe
+          "{{ resource_name }}"
+          --project="{{ gcp_project}}"
+          --region="{{ gcp_region}}"
+    failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
+        region: global
+        type: images
