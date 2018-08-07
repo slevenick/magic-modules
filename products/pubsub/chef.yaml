@@ -21,9 +21,7 @@ manifest: !ruby/object:Provider::Chef::Manifest
     This cookbook provides the built-in types and services for Chef to manage
     Google Pubsub resources, as native Chef types.
   depends:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google-gauth'
-      versions: '< 0.2.0'
+<%= indent(compile('provider/chef/common~depends.yaml'), 4) %>
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
 overrides: !ruby/object:Provider::ResourceOverrides
@@ -59,7 +57,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         request[:name] = ['projects', new_resource.project, 'subscriptions',
                           new_resource.s_label].join('/')
     provider_helpers:
-      - 'products/pubsub/helpers/provider_subscription.rb'
+      - 'products/pubsub/helpers/ruby/provider_subscription.rb'
   Topic: !ruby/object:Provider::Chef::ResourceOverride
     handlers: !ruby/object:Provider::Chef::Handlers
       resource_to_request_patch: |
@@ -87,7 +85,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
                     .join('/')
         )
     provider_helpers:
-      - 'products/pubsub/helpers/provider_topic.rb'
+      - 'products/pubsub/helpers/ruby/provider_topic.rb'
 examples: !ruby/object:Api::Resource::HashArray
   Subscription:
     - subscription.rb

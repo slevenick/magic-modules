@@ -49,10 +49,9 @@ module Provider
         @provider = provider
       end
 
-      # rubocop:disable Metrics/MethodLength
       def generate(object, _, kind, seed, extra)
         props = object.all_user_properties
-        name = Google::StringUtils.underscore(object.name)
+        name = object.name.underscore
 
         extra = extra.merge(
           project: "'test project\##{seed} data'",
@@ -77,7 +76,7 @@ module Provider
 
       def emit_manifest_block(props, seed, extra, ctx)
         props.map do |p|
-          emit_manifest_assign(p, seed, ctx, p.method(:field_name), true)
+          emit_manifest_assign(p, seed, ctx, p.method(:api_name), true)
         end
              .to_h
              .merge(extra.map { |k, v| [k.id2name, v] }.to_h)
@@ -89,7 +88,7 @@ module Provider
       # Nested Object style hash.
       def emit_fake_nested_block(props, seed, extra, ctx)
         unnested = props.map do |p|
-          emit_manifest_assign(p, seed, ctx, p.method(:field_name), true)
+          emit_manifest_assign(p, seed, ctx, p.method(:api_name), true)
         end
                         .to_h
                         .merge(extra.map { |k, v| [k.id2name, v] }.to_h)
@@ -121,7 +120,6 @@ module Provider
       end
 
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       def handlers
         {
           Api::Type::Boolean => ->(v) { v },

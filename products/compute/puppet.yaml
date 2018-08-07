@@ -26,9 +26,7 @@ manifest: !ruby/object:Provider::Puppet::Manifest
     - engine
     - gce
   requires:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google/gauth'
-      versions: '>= 0.2.0 < 0.3.0'
+<%= indent(compile('provider/puppet/common~requires.yaml'), 4) %>
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
 # TODO(nelsonjr): Match all special behavior Puppet <=> Chef.
@@ -47,6 +45,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise 'Disk cannot be edited'
   DiskType: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
     # TODO(nelsonjr): Make sure that attempts to create a disk fails
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: |
@@ -55,13 +54,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
           "values provided by Google Cloud Platform: #{dirty_display_formatted}"
         ].join(' ')
     provider_helpers:
-      - 'products/compute/helpers/provider_disk_type.rb'
+      - 'products/compute/helpers/ruby/provider_disk_type.rb'
   InterconnectAttachment: !ruby/object:Provider::Puppet::ResourceOverride
     broken_export_test: true
   Instance: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      - 'products/compute/helpers/provider_instance.rb'
-      - 'products/compute/helpers/instance_metadata.rb'
+      - 'products/compute/helpers/ruby/provider_instance.rb'
+      - 'products/compute/helpers/ruby/instance_metadata.rb'
   InstanceGroup: !ruby/object:Provider::Puppet::ResourceOverride
     # TODO(nelsonjr): Implement specific actions, such as addInstance and
     # setNamedPorts.
@@ -69,8 +68,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       flush: raise 'InstanceGroup cannot be edited.'
   InstanceTemplate: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      - 'products/compute/helpers/provider_instance_template.rb'
-      - 'products/compute/helpers/instance_metadata.rb'
+      - 'products/compute/helpers/ruby/provider_instance_template.rb'
+      - 'products/compute/helpers/ruby/instance_metadata.rb'
   Network: !ruby/object:Provider::Puppet::ResourceOverride
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: |
@@ -82,7 +81,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         end
         handle_auto_to_custom_change
     provider_helpers:
-      - 'products/compute/helpers/provider_network.rb'
+      - 'products/compute/helpers/ruby/provider_network.rb'
   Snapshot: !ruby/object:Provider::Puppet::ResourceOverride
     handlers: !ruby/object:Provider::Puppet::Handlers
       create: |
@@ -99,11 +98,29 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - google/compute/api/gcompute_disk
   TargetPool: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      - 'products/compute/helpers/provider_target_pool.rb'
+      - 'products/compute/helpers/ruby/provider_target_pool.rb'
   Region: !ruby/object:Provider::Puppet::ResourceOverride
     # TODO(nelsonjr): Make sure that attempts to create a region fails
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise 'Region cannot be edited' if @dirty
+  # Not yet implemented.
+  Autoscaler: !ruby/object:Provider::Puppet::ResourceOverride
+    exclude: true
+  RegionAutoscaler: !ruby/object:Provider::Puppet::ResourceOverride
+    exclude: true
+  TargetVpnGateway: !ruby/object:Provider::Puppet::ResourceOverride
+    exclude: true
+  SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
+    exclude: true
+  # Deprecated readonly resources
+  License: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
+  MachineType: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
+  Region: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
+  Zone: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
 functions:
   - !ruby/object:Provider::Config::Function
     name: 'gcompute_address_ip'
@@ -552,15 +569,14 @@ examples: !ruby/object:Api::Resource::HashArray
     - zone.pp
 files: !ruby/object:Provider::Config::Files
   copy:
-<%= indent(include('provider/puppet/common~copy.yaml'), 4) %>
+<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
     # Client-side functions require 'google/authorization'
     spec/stubs/google/authorization.rb: templates/spec_lib_stub.rb.erb
   compile:
     lib/google/compute/api/gcompute_disk.rb:
-      products/compute/helpers/api_gcompute_disk.rb
+      products/compute/helpers/puppet/bolt/api_gcompute_disk.erb
     lib/google/compute/api/gcompute_instance.rb:
-      products/compute/helpers/api_gcompute_instance.rb
-    lib/google/object_store.rb: google/object_store.rb
+      products/compute/helpers/puppet/bolt/api_gcompute_instance.erb
     lib/puppet/functions/gcompute_task_load_params.rb:
       templates/puppet/bolt~task_load_params.rb.erb
     lib/puppet/functions/gcompute_task_validate_param.rb:

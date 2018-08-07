@@ -24,6 +24,8 @@ module Provider
       attr_reader :state_func # Adds a StateFunc to the schema
       attr_reader :sensitive # Adds `Sensitive: true` to the schema
       attr_reader :validation # Adds a ValidateFunc to the schema
+      # Indicates that this is an Array that should have Set diff semantics.
+      attr_reader :unordered_list
 
       attr_reader :is_set # Uses a Set instead of an Array
       # Optional function to determine the unique ID of an item in the set
@@ -86,14 +88,13 @@ module Provider
     # Terraform-specific overrides to api.yaml.
     class PropertyOverride < Provider::PropertyOverride
       include OverrideFields
-
-      # rubocop:disable Metrics/MethodLength
       def validate
         super
 
         # Ensures boolean values are set to false if nil
         @sensitive ||= false
         @is_set ||= false
+        @unordered_list ||= false
         @default_from_api ||= false
 
         check_property :sensitive, :boolean

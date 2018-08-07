@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'google/ruby_utils'
 require 'provider/config'
 require 'provider/core'
 require 'provider/chef/manifest'
@@ -24,6 +25,8 @@ module Provider
   # Code generator for Chef Cookbooks that manage Google Cloud Platform
   # resources.
   class Chef < Provider::Core
+    include Google::RubyUtils
+
     RESERVED_WORDS = %w[deprecated updated].freeze
     TEST_FOLDER = 'recipes'.freeze
 
@@ -72,7 +75,6 @@ module Provider
     end
 
     # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/MethodLength
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
     def prop_decl(prop)
@@ -114,18 +116,16 @@ module Provider
     # rubocop:enable Metrics/PerceivedComplexity
 
     def label_name(product)
-      return product.label_override unless product.label_override.nil?
-      Google::StringUtils.underscore(product.name)
-                         .split('_')
-                         .map { |x| x[0] }
-                         .join
-                         .concat('_label')
+      product.name.underscore
+             .split('_')
+             .map { |x| x[0] }
+             .join
+             .concat('_label')
     end
 
     # Returns a list of all resource types being tested
     # ChefSpec requires this list to include all ResourceRefs
     # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/MethodLength
     def step_into_list(object, indent, start_indent)
       steps = [object.out_name].concat(object.all_resourcerefs
                                              .map(&:resource_ref)
@@ -162,7 +162,6 @@ module Provider
       )
     end
 
-    # rubocop:disable Metrics/MethodLength
     def emit_coerce(product_ns, class_name, spaces_used = 0)
       type = "::Google::#{product_ns}::Property::#{class_name}"
       lines(format([
@@ -239,7 +238,7 @@ module Provider
 
     def generate_typed_array(data, prop)
       type = Module.const_get(prop.item_type).new(prop.name).type
-      file = Google::StringUtils.underscore(type)
+      file = type.underscore
       prop_map = []
       prop_map << {
         source: File.join('templates', 'chef', 'property',
@@ -276,9 +275,9 @@ module Provider
 
     def emit_nested_object_overrides(data)
       data.clone.merge(
-        field_name: Google::StringUtils.camelize(data[:field], :upper),
-        object_type: Google::StringUtils.camelize(data[:obj_name], :upper),
-        product_ns: Google::StringUtils.camelize(data[:product_name], :upper),
+        api_name: data[:api_name].camelize(:upper),
+        object_type: data[:obj_name].camelize(:upper),
+        product_ns: data[:product_name].camelize(:upper),
         class_name: if data[:emit_array]
                       data[:property].item_type.property_class.last
                     else
@@ -290,7 +289,7 @@ module Provider
     def generate_resource(data)
       target_folder = File.join(data[:output_folder], 'resources')
       FileUtils.mkpath target_folder
-      name = Google::StringUtils.underscore(data[:object].name)
+      name = data[:object].name.underscore
       generate_resource_file data.clone.merge(
         default_template: provider_template_source(data),
         out_file: File.join(target_folder, "#{name}.rb")
@@ -299,7 +298,7 @@ module Provider
 
     def provider_template_source(data)
       if data[:object].manual
-        object_name = Google::StringUtils.underscore(data[:object].name)
+        object_name = data[:object].name.underscore
         File.join('products', data[:product_name], 'files',
                   "provider~chef~#{object_name}.rb")
       else
@@ -310,7 +309,7 @@ module Provider
     def generate_resource_tests(data)
       target_folder = File.join(data[:output_folder], 'spec')
       FileUtils.mkpath target_folder
-      name = Google::StringUtils.underscore(data[:object].name)
+      name = data[:object].name.underscore
       generate_resource_file data.clone.merge(
         default_template: 'templates/chef/resource_spec.erb',
         out_file: File.join(target_folder, "#{name}_spec.rb")
@@ -355,7 +354,6 @@ module Provider
     #                '/' (ex. first_level/second_level) or an array denoted
     #                by [] (ex. array_of_nested_props[])
     # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/MethodLength
     def build_nested_object(prop, current_path)
       object_lines = []
       prop.properties.each do |nested_prop|
@@ -392,6 +390,22 @@ module Provider
         output_folder: output_folder,
         out_file: File.join(target_folder, "#{fn.name}.rb")
       }
+    end
+
+    def generate_enum_properties(data, properties)
+      default_enums = properties.select do |p|
+        p.is_a?(Api::Type::Enum) && !p.default_value.nil?
+      end
+      default_enums.map do |p|
+        prop_name = "#{p.__resource.name}_#{p.name}".underscore
+        {
+          source: File.join('templates', 'chef',
+                            'property', 'enum_with_default.rb.erb'),
+          target: File.join('libraries', 'google', data[:product_name],
+                            'property', "#{prop_name}.rb"),
+          overrides: { prop: p }
+        }
+      end
     end
   end
 end

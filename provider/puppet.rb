@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'fileutils'
+require 'google/ruby_utils'
 require 'google/hash_utils'
 require 'google/string_utils'
 require 'provider/config'
@@ -31,6 +32,7 @@ module Provider
     BOLT_UNDEF_MAGIC = '<-undef->'.freeze
 
     include Provider::Puppet::Codegen
+    include Google::RubyUtils
 
     # Settings for the provider
     class Config < Provider::Config
@@ -173,10 +175,10 @@ module Provider
       end
     end
 
-    def generate(output_folder, types)
+    def generate(output_folder, types, version)
       generate_client_functions output_folder unless @config.functions.nil?
       generate_bolt_tasks output_folder unless @config.bolt_tasks.nil?
-      super(output_folder, types)
+      super(output_folder, types, version)
     end
 
     def compile_examples(output_folder)
@@ -204,10 +206,15 @@ module Provider
     end
 
     def property_body(property)
-      prop_generator = property_map.select { |type, _| property.class <= type }
-      raise "Unknown property type: #{property}" if prop_generator.empty?
-      body = prop_generator.values[0].call(property)
-      "#{body}\n" unless body.nil?
+      lines(
+        indent([
+          (['newvalue(:true)', 'newvalue(:false)'] \
+           if property.is_a? Api::Type::Boolean),
+          (generate_enum_body(property) if property.is_a? Api::Type::Enum),
+          ("defaultto #{ruby_literal(property.default_value)}" \
+         if property.default_value)
+        ].compact.flatten, 4)
+      )
     end
 
     def format_description(object, spaces, container, suffix = '')
@@ -373,7 +380,7 @@ module Provider
 
     def generate_typed_array(data, prop)
       type = Module.const_get(prop.item_type).new(prop.name).type
-      file = Google::StringUtils.underscore(type)
+      file = type.underscore
       prop_map = []
       prop_map << {
         source: File.join('templates', 'puppet', 'property',
@@ -416,9 +423,9 @@ module Provider
 
     def emit_nested_object_overrides(data)
       data.clone.merge(
-        field_name: Google::StringUtils.camelize(data[:field], :upper),
-        object_type: Google::StringUtils.camelize(data[:obj_name], :upper),
-        product_ns: Google::StringUtils.camelize(data[:product_name], :upper),
+        api_name: data[:api_name].camelize(:upper),
+        object_type: data[:obj_name].camelize(:upper),
+        product_ns: data[:product_name].camelize(:upper),
         class_name: if data[:emit_array]
                       data[:property].item_type.property_class.last
                     else
@@ -439,27 +446,8 @@ module Provider
       }
     end
 
-    def property_map
-      {
-        Api::Type::Array => ->(_) {},
-        Api::Type::Boolean => method(:generate_boolean_body),
-        Api::Type::Double => ->(_) {},
-        Api::Type::Enum => method(:generate_enum_body),
-        Api::Type::Integer => ->(_) {},
-        Api::Type::NameValues => ->(_) {},
-        Api::Type::NestedObject => ->(_) {},
-        Api::Type::ResourceRef => ->(_) {},
-        Api::Type::String => ->(_) {},
-        Api::Type::Time => ->(_) {}
-      }
-    end
-
-    def generate_boolean_body(_property)
-      indent(['newvalue(:true)', 'newvalue(:false)'], 4)
-    end
-
     def generate_enum_body(property)
-      indent(property.values.collect do |value|
+      property.values.collect do |value|
         if value.is_a?(Symbol)
           "newvalue(:#{value})"
         elsif value.is_a?(String)
@@ -467,7 +455,7 @@ module Provider
         else
           "#{value.class}newvalue(#{value})"
         end
-      end, 4)
+      end
     end
 
     def google_lib_basic(file, product_ns)
@@ -519,7 +507,6 @@ module Provider
       )
     end
 
-    # rubocop:disable Metrics/MethodLength
     def generate_bolt_tasks_code(task, output_folder)
       style = task.style
       template = File.join('templates', 'puppet', case style
@@ -546,6 +533,22 @@ module Provider
 
     def expand_function_vars(fn_config, data)
       data.gsub('{{function:name}}', fn_config.name)
+    end
+
+    def generate_enum_properties(data, properties)
+      default_enums = properties.select do |p|
+        p.is_a?(Api::Type::Enum) && !p.default_value.nil?
+      end
+      default_enums.map do |p|
+        prop_name = "#{p.__resource.name}_#{p.name}".underscore
+        {
+          source: File.join('templates', 'puppet',
+                            'property', 'enum_with_default.rb.erb'),
+          target: File.join('lib', 'google', data[:product_name],
+                            'property', "#{prop_name}.rb"),
+          overrides: { prop: p }
+        }
+      end
     end
   end
 end

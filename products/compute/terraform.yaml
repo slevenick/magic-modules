@@ -14,7 +14,125 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Provider::ResourceOverrides
   Address: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    id_format: "{{project}}/{{region}}/{{name}}"
+    examples: |
+      ```hcl
+      resource "google_compute_address" "default" {
+        name = "my-address"
+      }
+      ```
+      ```hcl
+      resource "google_compute_network" "default" {
+        name = "my-network"
+      }
+
+      resource "google_compute_subnetwork" "default" {
+        name          = "my-subnet"
+        ip_cidr_range = "10.0.0.0/16"
+        region        = "us-central1"
+        network       = "${google_compute_network.default.self_link}"
+      }
+
+      resource "google_compute_address" "internal_with_subnet_and_address" {
+        name         = "my-internal-address"
+        subnetwork   = "${google_compute_subnetwork.default.self_link}"
+        address_type = "INTERNAL"
+        address      = "10.0.42.42"
+        region       = "us-central1"
+      }
+      ```
+    properties:
+      address: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      addressType: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+      networkTier: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        description: |
+          The Region in which the created address should reside.
+          If it is not provided, the provider region is used.
+      subnetwork: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      attributes: |
+          * `address`: The IP of the created resource.
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/labels.erb
+  Autoscaler: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{zone}}/{{name}}"
+    examples: |
+      ```hcl
+      resource "google_compute_instance_template" "foobar" {
+        name           = "foobar"
+        machine_type   = "n1-standard-1"
+        can_ip_forward = false
+
+        tags = ["foo", "bar"]
+
+        disk {
+          source_image = "debian-cloud/debian-8"
+        }
+
+        network_interface {
+          network = "default"
+        }
+
+        metadata {
+          foo = "bar"
+        }
+
+        service_account {
+          scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+        }
+      }
+
+      resource "google_compute_target_pool" "foobar" {
+        name = "foobar"
+      }
+
+      resource "google_compute_instance_group_manager" "foobar" {
+        name = "foobar"
+        zone = "us-central1-f"
+
+        instance_template  = "${google_compute_instance_template.foobar.self_link}"
+        target_pools       = ["${google_compute_target_pool.foobar.self_link}"]
+        base_instance_name = "foobar"
+      }
+
+      resource "google_compute_autoscaler" "foobar" {
+        name   = "scaler"
+        zone   = "us-central1-f"
+        target = "${google_compute_instance_group_manager.foobar.self_link}"
+
+        autoscaling_policy = {
+          max_replicas    = 5
+          min_replicas    = 1
+          cooldown_period = 60
+
+          cpu_utilization {
+            target = 0.5
+          }
+        }
+      }
+      ```
+    properties:
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/autoscaler_overrides.yaml'), 6) %>
+      target: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'
+      zone: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
   BackendBucket: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -39,21 +157,117 @@ overrides: !ruby/object:Provider::ResourceOverrides
   BackendService: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
+      zone: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      diskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func:  diskEncryptionKeyDiffSuppress
+        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
+      sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
+        name: image
+        diff_suppress_func: 'diskImageDiffSuppress'
+      image: !ruby/object:Provider::Terraform::PropertyOverride
+        description: |
+          The image from which to initialize this disk. This can be
+          one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
+          `projects/{project}/global/images/family/{family}`, `global/images/{image}`,
+          `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
+          `{project}/{image}`, `{family}`, or `{image}`. If referred by family, the
+          images names must include the family name. If they don't, use the
+          [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
+          For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
+          These images can be referred by family name here.
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/detach_disk.erb
+      post_import: templates/terraform/post_import/disk.erb
+      constants: templates/terraform/constants/disk.erb
+      encoder: templates/terraform/encoders/disk.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/disk.erb
+      decoder: templates/terraform/decoders/disk.erb
+      resource_definition: templates/terraform/resource_definition/disk.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the disk encryption key will be stored in the raw
+        state as plain-text.
+        [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+      optional_properties: |
+        * (Deprecated) `disk_encryption_key_raw`:  This is an alias for
+          `disk_encryption_key.raw_key`.  It is deprecated to enhance
+          consistency with `source_image_encryption_key` and
+          `source_snapshot_encryption_key`.
+      attributes: |
+        * (Deprecated) `disk_encryption_key_sha256`: This is an alias for
+          `disk_encryption_key.sha256`.  It is deprecated to enhance
+          consistency with `source_image_encryption_key` and
+          `source_snapshot_encryption_key`.
+    examples: |
+      ```hcl
+      resource "google_compute_disk" "default" {
+        name  = "test-disk"
+        type  = "pd-ssd"
+        zone  = "us-central1-a"
+        image = "debian-8-jessie-v20170523"
+        labels {
+          environment = "dev"
+        }
+      }
+      ```
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_forwarding_rule" "default" {
+        name       = "website-forwarding-rule"
+        target     = "${google_compute_target_pool.default.self_link}"
+        port_range = "80"
+      }
+      ```
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/labels.erb
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       portRange: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'portRangeDiffSuppress'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      IPAddress: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      IPProtocol: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'caseDiffSuppress'
+        default_from_api: true
+      loadBalancingScheme: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: :EXTERNAL
+      network: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      subnetwork: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      backendService: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
+      networkTier: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      target: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
+      ports: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+        custom_expand: 'templates/terraform/custom_expand/set_to_list.erb'
+      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
+      serviceLabel: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -64,8 +278,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      ipVersion: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'emptyOrDefaultStringSuppress("IPV4")'
+      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
       region: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/labels.erb
   GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   HttpHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
@@ -187,8 +407,215 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Region: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+  RegionAutoscaler: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{region}}/{{name}}"
+    examples: |
+      ```hcl
+      resource "google_compute_instance_template" "foobar" {
+        name           = "foobar"
+        machine_type   = "n1-standard-1"
+        can_ip_forward = false
+
+        tags = ["foo", "bar"]
+
+        disk {
+          source_image = "debian-cloud/debian-8"
+        }
+
+        network_interface {
+          network = "default"
+        }
+
+        metadata {
+          foo = "bar"
+        }
+
+        service_account {
+          scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+        }
+      }
+
+      resource "google_compute_target_pool" "foobar" {
+        name = "foobar"
+      }
+
+      resource "google_compute_region_instance_group_manager" "foobar" {
+        name   = "foobar"
+        region = "us-central1"
+
+        instance_template  = "${google_compute_instance_template.foobar.self_link}"
+        target_pools       = ["${google_compute_target_pool.foobar.self_link}"]
+        base_instance_name = "foobar"
+      }
+
+      resource "google_compute_region_autoscaler" "foobar" {
+        name   = "scaler"
+        region = "us-central1"
+        target = "${google_compute_region_instance_group_manager.foobar.self_link}"
+
+        autoscaling_policy = {
+          max_replicas    = 5
+          min_replicas    = 1
+          cooldown_period = 60
+
+          cpu_utilization {
+            target = 0.5
+          }
+        }
+      }
+      ```
+    properties:
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/autoscaler_overrides.yaml'), 6) %>
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+  RegionDisk: !ruby/object:Provider::Terraform::ResourceOverride
+    properties:
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/detach_disk.erb
+      encoder: templates/terraform/encoders/disk.erb
+      decoder: templates/terraform/decoders/disk.erb
+      resource_definition: templates/terraform/resource_definition/disk.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the disk encryption key will be stored in the raw
+        state as plain-text.
+        [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+    examples: |
+      ```hcl
+      resource "google_compute_disk" "disk" {
+        name = "my-disk"
+        image = "debian-cloud/debian-9"
+        size = 50
+        type = "pd-ssd"
+        zone = "us-central1-a"
+      }
+
+      resource "google_compute_snapshot" "snapdisk" {
+        name = "my-disk-snapshot"
+        source_disk = "${google_compute_disk.disk.name}"
+        zone = "us-central1-a"
+      }
+
+      resource "google_compute_region_disk" "regiondisk" {
+        name = "my-regional-disk"
+        snapshot = "${google_compute_snapshot.snapdisk.self_link}"
+        type = "pd-ssd"
+        region = "us-central1"
+
+        replica_zones = ["us-central1-a", "us-central1-f"]
+      }
+      ```
   Route: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_network" "default" {
+        name = "compute-network"
+      }
+
+      resource "google_compute_subnetwork" "default" {
+        name          = "compute-subnetwork"
+        ip_cidr_range = "10.0.0.0/16"
+        network       = "${google_compute_network.default.self_link}"
+        region        = "us-central1"
+      }
+
+      resource "google_compute_route" "default" {
+        name        = "network-route"
+        dest_range  = "15.0.0.0/24"
+        network     = "${google_compute_network.foobar.name}"
+        next_hop_ip = "10.0.1.5"
+        priority    = 100
+      }
+      ```
+    properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
+      network: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      priority: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 1000
+      nextHopGateway: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/route_gateway.erb
+        # Description here is overridden because puppet won't compile if you ask
+        # it to include docs greater than 80 characters.
+        description: |+
+          URL to a gateway that should handle matching packets.
+          Currently, you can only specify the internet gateway, using a full or
+          partial valid URL:
+          * `https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway`
+          * `projects/project/global/gateways/default-internet-gateway`
+          * `global/gateways/default-internet-gateway`
+          * The string `default-internet-gateway`.
+          
+      nextHopInstance: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/route_instance.erb
+        # Description here is overridden because puppet won't compile if you ask
+        # it to include docs greater than 80 characters.
+        description: |+
+          URL to an instance that should handle matching packets.
+          You can specify this as a full or partial URL. For example:
+          * `https://www.googleapis.com/compute/v1/projects/project/zones/zone/instances/instance`
+          * `projects/project/zones/zone/instances/instance`
+          * `zones/zone/instances/instance`
+          * Just the instance name, with the zone in `next_hop_instance_zone`.
+          
+      tags: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/set_to_list.erb
+        is_set: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/route.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/route.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |+
+          * `next_hop_instance_zone` - (Optional when `next_hop_instance` is
+            specified)  The zone of the instance specified in
+            `next_hop_instance`.  Omit if `next_hop_instance` is specified as
+            a URL.
+  Router: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{region}}/{{name}}"
+    mutex: router/{{region}}/{{name}}
+    examples: |
+      ```hcl
+      resource "google_compute_network" "foobar" {
+        name                    = "my-network"
+        auto_create_subnetworks = false
+      }
+
+      resource "google_compute_router" "foobar" {
+        name    = "my-router"
+        network = "${google_compute_network.foobar.name}"
+        bgp {
+          asn               = 64514
+          advertise_mode    = "CUSTOM"
+          advertised_groups = ["ALL_SUBNETS"]
+          advertised_ip_ranges {
+            range = "1.2.3.4"
+          }
+          advertised_ip_ranges {
+            range = "6.7.0.0/16"
+          }
+        }
+      }
+      ```
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
@@ -262,13 +689,53 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: true
   Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
-    exclude: true
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      secondaryIpRanges: !ruby/object:Provider::Terraform::PropertyOverride
+        name: secondaryIpRange
+        unordered_list: true
+        default_from_api: true
+      secondaryIpRanges.rangeName: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      secondaryIpRanges.ipCidrRange: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateIpCidrRange'
+      fingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
       ipCidrRange: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        input: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/subnetwork.erb
+      resource_definition: templates/terraform/resource_definition/subnetwork.erb
+    examples: |
+      ```hcl
+        resource "google_compute_network" "custom-test" {
+          name                    = "test-network"
+          auto_create_subnetworks = false
+        }
+
+        resource "google_compute_subnetwork" "network-with-private-secondary-ip-ranges" {
+          name          = "test-subnetwork"
+          ip_cidr_range = "10.2.0.0/16"
+          region        = "us-central1"
+          network       = "${google_compute_network.custom-test.self_link}"
+          secondary_ip_range {
+            range_name    = "tf-test-secondary-range-update1"
+            ip_cidr_range = "192.168.10.0/24"
+          }
+        }
+      ```
   TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -449,6 +916,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         default_value: :NONE
       service: !ruby/object:Provider::Terraform::PropertyOverride
         name: backendService
+      sslPolicy: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
   TargetTcpProxy: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -560,7 +1029,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       region: !ruby/object:Provider::Terraform::PropertyOverride
         required: false # the provider-default value will be used if not specified
         default_from_api: true
-        custom_flatten: 'templates/terraform/custom_flatten/region_name_only.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       forwardingRules: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       tunnels: !ruby/object:Provider::Terraform::PropertyOverride
@@ -582,10 +1051,22 @@ files: !ruby/object:Provider::Config::Files
     'google/import_test.go': 'templates/terraform/import_test.go'
     # Handwritten acceptance tests for autogenerated resources.
     # Adding them here allows updating the tests as part of a MM pull request.
+    'google/resource_compute_address_test.go':
+      'templates/terraform/tests/resource_compute_address_test.go'
+    'google/resource_compute_autoscaler_test.go':
+      'templates/terraform/tests/resource_compute_autoscaler_test.go'
     'google/resource_compute_global_address_test.go':
       'templates/terraform/tests/resource_compute_global_address_test.go'
+    'google/resource_compute_region_autoscaler_test.go':
+      'templates/terraform/tests/resource_compute_region_autoscaler_test.go'
+    'google/resource_compute_region_disk_test.go':
+      'templates/terraform/tests/resource_compute_region_disk_test.go'
+    'google/resource_compute_router_test.go':
+      'templates/terraform/tests/resource_compute_router_test.go'
     'google/resource_compute_target_https_proxy_test.go':
       'templates/terraform/tests/resource_compute_target_https_proxy_test.go'
+    'google/resource_compute_target_ssl_proxy_test.go':
+      'templates/terraform/tests/resource_compute_target_ssl_proxy_test.go'
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:

@@ -23,9 +23,7 @@ manifest: !ruby/object:Provider::Puppet::Manifest
     - cloud
     - dns
   requires:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google/gauth'
-      versions: '>= 0.2.0 < 0.3.0'
+<%= indent(compile('provider/puppet/common~requires.yaml'), 4) %>
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
 overrides: !ruby/object:Provider::ResourceOverrides
@@ -57,12 +55,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
         # DNS service already did server-side filtering of resource.
         lambda { |resource| true }
     provider_helpers:
-      - 'products/dns/helpers/puppet_provider_resource_set.rb.erb'
-      - 'products/dns/helpers/provider_resource_set.rb.erb'
+      - 'products/dns/helpers/puppet/provider_resource_set.rb.erb'
+      - 'products/dns/helpers/ruby/provider_resource_set.rb.erb'
     resource_to_request: false
     return_if_object: false
     unwrap_resource: false
   Project: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise 'DNS Project cannot be edited' if @dirty
 tests: !ruby/object:Api::Resource::HashArray
@@ -78,10 +77,9 @@ examples: !ruby/object:Api::Resource::HashArray
     - resource_record_set.pp
 files: !ruby/object:Provider::Config::Files
   copy:
-<%= indent(include('provider/puppet/common~copy.yaml'), 4) %>
+<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
   compile:
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
-    lib/google/object_store.rb: google/object_store.rb
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
 <% # common~compile~after.yaml should be the last line of compile: section -%>
 test_data: !ruby/object:Provider::Config::TestData

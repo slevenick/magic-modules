@@ -19,12 +19,16 @@ module Provider
     module OverrideProperties
       attr_reader :access_api_results
       attr_reader :collection
+      attr_reader :custom_create_resource
+      attr_reader :custom_update_resource
       attr_reader :create
       attr_reader :delete
       attr_reader :editable
       attr_reader :hidden
       attr_reader :imports
       attr_reader :provider_helpers
+      attr_reader :return_if_object
+      attr_reader :unwrap_resource
       attr_reader :update
       attr_reader :version_added
     end
@@ -32,29 +36,36 @@ module Provider
     # Product specific overriden properties for Ansible
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
-
-      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/AbcSize
       def validate
         super
 
         default_value_property :access_api_results, false
+        default_value_property :custom_create_resource, false
+        default_value_property :custom_update_resource, false
         default_value_property :exclude, false
         default_value_property :editable, true
         default_value_property :imports, []
         default_value_property :provider_helpers, []
+        default_value_property :unwrap_resource, false
 
         check_property :access_api_results, :boolean
         check_optional_property :collection, ::String
+        check_property :custom_create_resource, :boolean
+        check_property :custom_update_resource, :boolean
         check_optional_property :create, ::String
         check_optional_property :delete, ::String
         check_property :editable, :boolean
         check_optional_property :hidden, ::Array
         check_property :imports, ::Array
         check_property :provider_helpers, ::Array
+        check_optional_property :return_if_object, ::String
         check_optional_property :update, ::String
+        check_optional_property :unwrap_resource, :boolean
         check_optional_property :version_added, ::String
       end
       # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
 
       private
 

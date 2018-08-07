@@ -18,7 +18,7 @@ name: Google Compute Engine
 prefix: gcompute
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: https://www.googleapis.com/compute/v1/
     default: true
   - !ruby/object:Api::Product::Version
@@ -34,6 +34,9 @@ objects:
     exports:
       - !ruby/object:Api::Type::FetchedExternal
         name: address
+      - !ruby/object:Api::Type::SelfLink
+        name: selfLink
+    input: true
     description: |
       Represents an Address resource.
 
@@ -48,6 +51,11 @@ objects:
       the instance is assigned a new internal IP address, either by Compute
       Engine or by you. External IP addresses can be either ephemeral or
       static.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Reserving a Static External IP Address': 'https://cloud.google.com/compute/docs/instances-and-network'
+        'Reserving a Static Internal IP Address': 'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-internal-ip-address'
+      api: 'https://cloud.google.com/compute/docs/reference/beta/addresses'
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
@@ -62,8 +70,19 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'address'
         description: |
-          The static external IP address represented by this
-          resource. Only IPv4 is supported.
+          The static external IP address represented by this resource. Only
+          IPv4 is supported. An address may only be specified for INTERNAL
+          address types. The IP address must be inside the specified subnetwork,
+          if any.
+      - !ruby/object:Api::Type::Enum
+        name: 'addressType'
+        description: |
+          The type of address to reserve, either INTERNAL or EXTERNAL.
+          If unspecified, defaults to EXTERNAL.
+        values:
+          - :INTERNAL
+          - :EXTERNAL
+        default_value: :EXTERNAL
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -80,17 +99,91 @@ objects:
         description: |
           Name of the resource. The name must be 1-63 characters long, and
           comply with RFC1035. Specifically, the name must be 1-63 characters
-          long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?
+          long and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`
           which means the first character must be a lowercase letter, and all
           following characters must be a dash, lowercase letter, or digit,
           except the last character, which cannot be a dash.
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'networkTier'
+        description: |
+          The networking tier used for configuring this address. This field can
+          take the following values: PREMIUM or STANDARD. If this field is not
+          specified, it is assumed to be PREMIUM.
+        values:
+          - :PREMIUM
+          - :STANDARD
+        min_version: beta
       # TODO(alexstephen): Add in status with exclude attribute. What does this
       # mean?
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'subnetwork'
+        resource: 'Subnetwork'
+        imports: 'selfLink'
+        description: |
+          The URL of the subnetwork in which to reserve the address. If an IP
+          address is specified, it must be within the subnetwork's IP range.
+          This field can only be used with INTERNAL type with
+          GCE_ENDPOINT/DNS_RESOLVER purposes.
       - !ruby/object:Api::Type::Array
         name: 'users'
         description: 'The URLs of the resources that are using this address.'
         item_type: Api::Type::String
         output: true
+      - !ruby/object:Api::Type::NameValues
+        name: 'labels'
+        description: |
+          Labels to apply to this address.  A list of key->value pairs.
+        key_type: Api::Type::String
+        value_type: Api::Type::String
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
+        min_version: beta
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
+        update_verb: :POST
+        min_version: beta
+  - !ruby/object:Api::Resource
+    name: 'Autoscaler'
+    kind: 'compute#autoscaler'
+    base_url: projects/{{project}}/zones/{{zone}}/autoscalers
+    update_url: projects/{{project}}/zones/{{zone}}/autoscalers?autoscaler={{name}}
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: selfLink
+    description: |
+      Represents an Autoscaler resource.
+
+      Autoscalers allow you to automatically scale virtual machine instances in
+      managed instance groups according to an autoscaling policy that you
+      define.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Autoscaling Groups of Instances': 'https://cloud.google.com/compute/docs/autoscaler/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/autoscalers'
+<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'zone'
+        resource: 'Zone'
+        imports: 'name'
+        description: |
+          URL of the zone where the instance group resides.
+        required: true
+        input: true
+    properties:
+<%= indent(compile('products/compute/autoscaler_properties.yaml'), 6) %>
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'target'
+        resource: 'InstanceGroupManager'
+        imports: 'selfLink'
+        description: |
+          URL of the managed instance group that this autoscaler will scale.
+        required: true
   - !ruby/object:Api::Resource
     name: 'BackendBucket'
     kind: 'compute#backendBucket'
@@ -435,7 +528,7 @@ objects:
     # triggered for create. Implement support for read only objects, and delete
     # the virtual tag
     # | readonly: true
-    virtual: true
+    readonly: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -523,6 +616,7 @@ objects:
     # - createSnapshot
     # - setLabels
     kind: 'compute#disk'
+    input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks
     exports:
       - 'name'
@@ -544,8 +638,13 @@ objects:
 
       Add a persistent disk to your instance when you need reliable and
       affordable storage with consistent performance characteristics.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Adding a persistent disk':
+          'https://cloud.google.com/compute/docs/disks/add-persistent-disk'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/disks'
 <%=
-  # Larger disk were timing out at creation. Bumping up to 5 minutes.
+  # Larger disks were timing out at creation. Bumping up to 5 minutes.
   # https://github.com/terraform-providers/terraform-provider-google/issues/703
   indent(compile_file({timeouts: { insert_sec: 5 * 60 }},
                       'templates/zonal_async.yaml.erb'), 4)
@@ -557,34 +656,6 @@ objects:
         imports: 'name'
         description: 'A reference to the zone where the disk resides.'
         required: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'diskEncryptionKey'
-        description: |
-          Encrypts the disk using a customer-supplied encryption key.
-
-          After you encrypt a disk with a customer-supplied key, you must
-          provide the same key if you use the disk later (e.g. to create a disk
-          snapshot or an image, or to attach the disk to a virtual machine).
-
-          Customer-supplied encryption keys do not protect access to metadata of
-          the disk.
-
-          If you do not provide an encryption key when creating the disk, then
-          the disk will be encrypted using an automatically generated key and
-          you do not need to provide a key to use the disk later.
-        properties:
-          - !ruby/object:Api::Type::String
-            name: 'rawKey'
-            description: |
-              Specifies a 256-bit customer-supplied encryption key, encoded in
-              RFC 4648 base64 to either encrypt or decrypt this resource.
-          - !ruby/object:Api::Type::String
-            name: 'sha256'
-            description: |
-              The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
-              encryption key that protects this resource.
-            output: true
-        input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'sourceImageEncryptionKey'
         description: |
@@ -612,99 +683,11 @@ objects:
           that was later deleted and recreated under the same name, the source
           image ID would identify the exact version of the image that was used.
         output: true
-      # TODO(nelsonjr): Investigate if 'sourceSnapshot' is suitable to be a
-      # resource reference, as it takes 'global/' snapshots.
-      - !ruby/object:Api::Type::String
-        name: 'sourceSnapshot'
-        description: |
-          The source snapshot used to create this disk. You can provide this as
-          a partial or full URL to the resource. For example, the following are
-          valid values:
-
-          * https://www.googleapis.com/compute/v1/projects/project/global/
-                snapshots/snapshot
-          * projects/project/global/snapshots/snapshot
-          * global/snapshots/snapshot
-      - !ruby/object:Api::Type::NestedObject
-        name: 'sourceSnapshotEncryptionKey'
-        description: |
-          The customer-supplied encryption key of the source snapshot. Required
-          if the source snapshot is protected by a customer-supplied encryption
-          key.
-        properties:
-          - !ruby/object:Api::Type::String
-            name: 'rawKey'
-            description: |
-              Specifies a 256-bit customer-supplied encryption key, encoded in
-              RFC 4648 base64 to either encrypt or decrypt this resource.
-          - !ruby/object:Api::Type::String
-            name: 'sha256'
-            description: |
-              The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
-              encryption key that protects this resource.
-            output: true
-        input: true
-      - !ruby/object:Api::Type::String
-        name: 'sourceSnapshotId'
-        description: |
-          The unique ID of the snapshot used to create this disk. This value
-          identifies the exact snapshot that was used to create this persistent
-          disk. For example, if you created the persistent disk from a snapshot
-          that was later deleted and recreated under the same name, the source
-          snapshot ID would identify the exact version of the snapshot that was
-          used.
-        output: true
+<%= indent(compile('products/compute/disk_parameters.yaml'), 6) %>
     properties:
-      - !ruby/object:Api::Type::Time
-        name: 'creationTimestamp'
-        description: 'Creation timestamp in RFC3339 text format.'
-        output: true
-      - !ruby/object:Api::Type::String
-        name: 'description'
-        description: |
-          An optional description of this resource. Provide this property when
-          you create the resource.
-      - !ruby/object:Api::Type::Integer
-        name: 'id'
-        description: 'The unique identifier for the resource.'
-        output: true
-      - !ruby/object:Api::Type::Time
-        name: 'lastAttachTimestamp'
-        description: 'Last attach timestamp in RFC3339 text format.'
-        output: true
-      - !ruby/object:Api::Type::Time
-        name: 'lastDetachTimestamp'
-        description: 'Last dettach timestamp in RFC3339 text format.'
-        output: true
-      - !ruby/object:Api::Type::Array
-        name: 'licenses'
-        description: 'Any applicable publicly visible licenses.'
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: |
-          Name of the resource. Provided by the client when the resource is
-          created. The name must be 1-63 characters long, and comply with
-          RFC1035. Specifically, the name must be 1-63 characters long and match
-          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
-          first character must be a lowercase letter, and all following
-          characters must be a dash, lowercase letter, or digit, except the last
-          character, which cannot be a dash.
-      # 'options' fields is internal use only. do not expose.
-      # | - !ruby/object:Api::Type::String
-      # |   name: 'options'
-      # |   description: 'Internal use only'
-      - !ruby/object:Api::Type::Integer
-        name: 'sizeGb'
-        description: |
-          Size of the persistent disk, specified in GB. You can specify this
-          field when creating a persistent disk using the sourceImage or
-          sourceSnapshot parameter, or specify it alone to create an empty
-          persistent disk.
-
-          If you specify this field along with sourceImage or sourceSnapshot,
-          the value of sizeGb must not be less than the size of the sourceImage
-          or the size of the snapshot.
+<%=
+  indent(compile_file({location: 'zone'}, 'products/compute/disks.yaml'), 6)
+%>
       - !ruby/object:Api::Type::String
         name: 'sourceImage'
         description: |
@@ -733,20 +716,6 @@ objects:
 
           global/images/family/my-private-family
         input: true
-      # TODO(nelsonjr): Make this a resource refefence
-      - !ruby/object:Api::Type::String
-        name: 'type'
-        description: |
-          URL of the disk type resource describing which disk type to use to
-          create the disk. Provide this when creating the disk.
-        output: true
-      - !ruby/object:Api::Type::Array
-        name: 'users'
-        description: |
-          Links to the users of the disk (attached instances) in form:
-          project/zones/zone/instances/instance
-        item_type: Api::Type::String
-        output: true
   - !ruby/object:Api::Resource
     name: 'Firewall'
     kind: 'compute#firewall'
@@ -787,7 +756,7 @@ objects:
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
                 icmp, esp, ah, sctp), or the IP protocol number.
-              field: 'IPProtocol'
+              api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
               item_type: Api::Type::String
@@ -876,10 +845,19 @@ objects:
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
     base_url: projects/{{project}}/regions/{{region}}/forwardingRules
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       A ForwardingRule resource. A ForwardingRule resource specifies which pool
       of target virtual machines to forward a packet to if it matches the given
       [IPAddress, IPProtocol, portRange] tuple.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/forwardingRule'
+    input: true
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
@@ -904,6 +882,59 @@ objects:
           must be of a type appropriate to the target object.
 
           This field is not used for internal load balancing.
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
+      - !ruby/object:Api::Type::NameValues
+        name: 'labels'
+        description: |
+          Labels to apply to this forwarding rule.  A list of key->value pairs.
+        value_type: Api::Type::String
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+        min_version: beta
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+        update_verb: :POST
+        min_version: beta
+      - !ruby/object:Api::Type::Enum
+        name: 'networkTier'
+        description: |
+          The networking tier used for configuring this address. This field can
+          take the following values: PREMIUM or STANDARD. If this field is not
+          specified, it is assumed to be PREMIUM.
+        values:
+          - :PREMIUM
+          - :STANDARD
+        min_version: beta
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'serviceLabel'
+        description: |
+          An optional prefix to the service name for this Forwarding Rule.
+          If specified, will be the first label of the fully qualified service
+          name.
+
+          The label must be 1-63 characters long, and comply with RFC1035.
+          Specifically, the label must be 1-63 characters long and match the
+          regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the first
+          character must be a lowercase letter, and all following characters
+          must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+
+          This field is only used for internal load balancing.
+        min_version: beta
+      - !ruby/object:Api::Type::String
+        name: 'serviceName'
+        description: |
+          The internal fully qualified service name for this Forwarding Rule.
+          This field is only used for internal load balancing.
+        output: true
+        min_version: beta
   - !ruby/object:Api::Resource
     name: 'GlobalAddress'
     kind: 'compute#address'
@@ -953,6 +984,23 @@ objects:
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
         required: true
+      - !ruby/object:Api::Type::NameValues
+        name: 'labels'
+        description: |
+          Labels to apply to this address.  A list of key->value pairs.
+        key_type: Api::Type::String
+        value_type: Api::Type::String
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
+        min_version: beta
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
+        update_verb: :POST
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'ipVersion'
         description: |
@@ -1268,6 +1316,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'InstanceTemplate'
     kind: 'compute#instanceTemplate'
+    input: true
     base_url: projects/{{project}}/global/instanceTemplates
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -1350,7 +1399,7 @@ objects:
     name: 'License'
     kind: 'compute#license'
     base_url: /projects/{{project}}/global/licenses
-    virtual: true
+    readonly: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1792,6 +1841,9 @@ objects:
     name: 'InstanceGroupManager'
     kind: 'compute#instanceGroupManager'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       Creates a managed instance group using the information that you specify in
       the request. After the group is created, it schedules an action to create
@@ -2073,7 +2125,7 @@ objects:
       - 'name'
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
-    virtual: true
+    readonly: true
     description: |
       Represents a MachineType resource. Machine types determine the virtualized
       hardware specifications of your virtual machine instances, such as the
@@ -2211,7 +2263,7 @@ objects:
           A gateway address for default routing to other networks. This value is
           read only and is selected by the Google Compute Engine, typically as
           the first usable address in the IPv4Range.
-        field: 'gatewayIPv4'
+        api_name: 'gatewayIPv4'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2222,7 +2274,7 @@ objects:
           The range of internal addresses that are legal on this network. This
           range is a CIDR specification, for example: 192.168.0.0/16. Provided
           by the client when the network is created.
-        field: 'IPv4Range'
+        api_name: 'IPv4Range'
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -2262,7 +2314,7 @@ objects:
       - name
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
-    virtual: true
+    readonly: true
     description: |
       Represents a Region resource. A region is a specific geographical
       location where you can run your resources. Each region has one or more
@@ -2332,9 +2384,112 @@ objects:
         item_type: Api::Type::String
         output: true
   - !ruby/object:Api::Resource
+    name: 'RegionAutoscaler'
+    kind: 'compute#autoscaler'
+    base_url: projects/{{project}}/regions/{{region}}/autoscalers
+    update_url: projects/{{project}}/regions/{{region}}/autoscalers?autoscaler={{name}}
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: selfLink
+    description: |
+      Represents an Autoscaler resource.
+
+      Autoscalers allow you to automatically scale virtual machine instances in
+      managed instance groups according to an autoscaling policy that you
+      define.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Autoscaling Groups of Instances': 'https://cloud.google.com/compute/docs/autoscaler/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionAutoscalers'
+<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: |
+          URL of the region where the instance group resides.
+        required: true
+        input: true
+    properties:
+<%= indent(compile('products/compute/autoscaler_properties.yaml'), 6) %>
+      - !ruby/object:Api::Type::String
+        name: 'target'
+        # TODO(#303): resourceref once RegionIGM exists
+        # resource: 'RegionInstanceGroupManager'
+        # imports: 'selfLink'
+        description: |
+          URL of the managed instance group that this autoscaler will scale.
+        required: true
+  - !ruby/object:Api::Resource
+    name: 'RegionDisk'
+    kind: 'compute#disk'
+    input: true
+    base_url: projects/{{project}}/regions/{{region}}/disks
+    min_version: beta
+    exports:
+      - 'name'
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
+    description: |
+      Persistent disks are durable storage devices that function similarly to
+      the physical disks in a desktop or a server. Compute Engine manages the
+      hardware behind these devices to ensure data redundancy and optimize
+      performance for you. Persistent disks are available as either standard
+      hard disk drives (HDD) or solid-state drives (SSD).
+
+      Persistent disks are located independently from your virtual machine
+      instances, so you can detach or move persistent disks to keep your data
+      even after you delete your instances. Persistent disk performance scales
+      automatically with size, so you can resize your existing persistent disks
+      or add more persistent disks to an instance to meet your performance and
+      storage space requirements.
+
+      Add a persistent disk to your instance when you need reliable and
+      affordable storage with consistent performance characteristics.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Adding or Resizing Regional Persistent Disks':
+          'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionDisks'
+<%=
+  # Larger disks were timing out at creation. Bumping up to 5 minutes.
+  # https://github.com/terraform-providers/terraform-provider-google/issues/703
+  indent(compile_file({timeouts: { insert_sec: 5 * 60 }},
+                      'templates/regional_async.yaml.erb'), 4)
+%>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: 'A reference to the region where the disk resides.'
+        required: true
+<%= indent(compile_file({}, 'products/compute/disk_parameters.yaml'), 6) %>
+    properties:
+<%=
+  indent(compile_file({location: 'region'}, 'products/compute/disks.yaml'), 6)
+%> 
+      - !ruby/object:Api::Type::Array
+        name: 'replicaZones'
+        description: 'URLs of the zones where the disk should be replicated to.'
+        min_size: 2
+        max_size: 2
+        required: true
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'zone'
+          resource: 'Zone'
+          imports: 'selfLink'
+          description: |
+            A reference to a zone where the disk should be replicated to.
+  - !ruby/object:Api::Resource
     name: 'Route'
     kind: 'compute#route'
     base_url: projects/{{project}}/global/routes
+    input: true
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       Represents a Route resource.
 
@@ -2355,8 +2510,13 @@ objects:
       Engine-operated gateway. Packets that do not match any route in the
       sending virtual machine's routing table will be dropped.
 
-      A Routes resources must have exactly one specification of either
+      A Route resource must have exactly one specification of either
       nextHopGateway, nextHopInstance, nextHopIp, or nextHopVpnTunnel.
+
+    references: !ruby/object:Api::Resource::ReferenceLinks
+          guides:
+            'Using Routes': 'https://cloud.google.com/vpc/docs/using-routes'
+          api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routes'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
@@ -2364,6 +2524,12 @@ objects:
         description: |
           The destination range of outgoing packets that this route applies to.
           Only IPv4 is supported.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property
+          when you create the resource.
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -2374,12 +2540,14 @@ objects:
           the first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the
           last character, which cannot be a dash.
+        required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
         resource: 'Network'
         imports: 'selfLink'
         description: 'The network that this route applies to.'
         input: true
+        required: true
       - !ruby/object:Api::Type::Integer
         name: 'priority'
         description: |
@@ -2406,7 +2574,7 @@ objects:
           partial valid URL:
 
           * https://www.googleapis.com/compute/v1/projects/project/
-                global/gateways/default-internet-gateway
+          global/gateways/default-internet-gateway
           * projects/project/global/gateways/default-internet-gateway
           * global/gateways/default-internet-gateway
         input: true
@@ -2418,7 +2586,7 @@ objects:
           You can specify this as a full or partial URL. For example:
 
           * https://www.googleapis.com/compute/v1/projects/project/zones/zone/
-              instances/instance
+          instances/instance
           * projects/project/zones/zone/instances/instance
           * zones/zone/instances/instance
         input: true
@@ -2433,6 +2601,125 @@ objects:
         description: |
           URL to a VpnTunnel that should handle matching packets.
         input: true
+      - !ruby/object:Api::Type::String
+        name: 'nextHopNetwork'
+        output: true
+        description: |
+          URL to a Network that should handle matching packets.
+  - !ruby/object:Api::Resource
+    name: 'Router'
+    kind: 'compute#router'
+    base_url: projects/{{project}}/regions/{{region}}/routers
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
+    description: |
+      Represents a Router resource.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+          guides:
+            'Google Cloud Router': 'https://cloud.google.com/router/docs/'
+          api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
+<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: region
+        resource: Region
+        imports: name
+        description: Region where the router resides.
+        input: true
+        required: true
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          Name of the resource. The name must be 1-63 characters long, and
+          comply with RFC1035. Specifically, the name must be 1-63 characters
+          long and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`
+          which means the first character must be a lowercase letter, and all
+          following characters must be a dash, lowercase letter, or digit,
+          except the last character, which cannot be a dash.
+        input: true
+        required: true
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          An optional description of this resource.
+      - !ruby/object:Api::Type::ResourceRef
+        name: network
+        resource: Network
+        imports: 'selfLink'
+        description: |
+          A reference to the network to which this router belongs.
+        required: true
+        input: true
+      # TODO(danawillow): Figure out the story for interfaces/bgpPeers. Right
+      # now in Terraform we have three separate resources: router,
+      # router_interface, and router_peer. Decide whether we want to keep that
+      # pattern for the other providers, keep it unique for Terraform, or add
+      # these fields to the Terraform resource (and then within that, decide
+      # whether to deprecate router_interface and router_peer or leave them
+      # alone).
+      - !ruby/object:Api::Type::NestedObject
+        name: bgp
+        description: |
+          BGP information specific to this router.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: asn
+            description: |
+              Local BGP Autonomous System Number (ASN). Must be an RFC6996
+              private ASN, either 16-bit or 32-bit. The value will be fixed for
+              this router resource. All VPN tunnels that link to this router
+              will have the same local ASN.
+            required: true
+          - !ruby/object:Api::Type::Enum
+            name: advertiseMode
+            description: |
+              User-specified flag to indicate which mode to use for advertisement.
+
+              Valid values of this enum field are: DEFAULT, CUSTOM
+            values:
+              - :DEFAULT
+              - :CUSTOM
+            default_value: :DEFAULT
+          - !ruby/object:Api::Type::Array
+            name: advertisedGroups
+            description: |
+              User-specified list of prefix groups to advertise in custom mode.
+              This field can only be populated if advertiseMode is CUSTOM and
+              is advertised to all peers of the router. These groups will be
+              advertised in addition to any specified prefixes. Leave this field
+              blank to advertise no custom groups.
+
+              This enum field has the one valid value: ALL_SUBNETS
+            item_type: Api::Type::String # TODO(#324): enum?
+          - !ruby/object:Api::Type::Array
+            name: advertisedIpRanges
+            description: |
+              User-specified list of individual IP ranges to advertise in
+              custom mode. This field can only be populated if advertiseMode
+              is CUSTOM and is advertised to all peers of the router. These IP
+              ranges will be advertised in addition to any specified groups.
+              Leave this field blank to advertise no custom IP ranges.
+            item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: range
+                    description: |
+                      The IP range to advertise. The value must be a
+                      CIDR-formatted string.
+                  - !ruby/object:Api::Type::String
+                    name: description
+                    description: |
+                      User-specified description for the IP range.
   - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
@@ -2608,7 +2895,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'SslPolicy'
     # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
-    exclude: true
     kind: 'compute#sslPolicy'
     base_url: projects/{{project}}/global/sslPolicies
     update_verb: :PATCH
@@ -2710,6 +2996,7 @@ objects:
     name: 'Subnetwork'
     kind: 'compute#subnetwork'
     base_url: projects/{{project}}/regions/{{region}}/subnetworks
+    input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2756,15 +3043,12 @@ objects:
           An optional description of this resource. Provide this property when
           you create the resource. This field can be set only at resource
           creation time.
-      # TODO(nelsonjr): Update 'gatewayAddress' input:true vs. output:true
-      # depending on the resolution of http://b/63113897.
       - !ruby/object:Api::Type::String
         name: 'gatewayAddress'
         description: |
           The gateway address for default routes to reach destination addresses
-          outside this subnetwork. This field can be set only at resource
-          creation time.
-        input: true
+          outside this subnetwork.
+        output: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2776,7 +3060,9 @@ objects:
           Provide this property when you create the subnetwork. For example,
           10.0.0.0/8 or 192.168.0.0/16. Ranges must be unique and
           non-overlapping within a network. Only IPv4 is supported.
-        input: true
+        required: true
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -2787,6 +3073,7 @@ objects:
           means the first character must be a lowercase letter, and all
           following characters must be a dash, lowercase letter, or digit,
           except the last character, which cannot be a dash.
+        required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
         resource: 'Network'
@@ -2795,20 +3082,74 @@ objects:
           The network this subnet belongs to.
           Only networks that are in the distributed mode can have subnetworks.
         input: true
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableFlowLogs'
+        description: |
+          Whether to enable flow logging for this subnetwork.
+        min_version: beta
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        send_empty_value: true
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. This field is used internally during
+          updates of this resource.
+        min_version: beta
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+      - !ruby/object:Api::Type::Array
+        name: 'secondaryIpRanges'
+        description: |
+          An array of configurations for secondary IP ranges for VM instances
+          contained in this subnetwork. The primary IP of such VM must belong
+          to the primary ipCidrRange of the subnetwork. The alias IPs may belong
+          to either primary or secondary ranges.
+        min_version: beta
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'rangeName'
+              required: true
+              description: |
+                The name associated with this subnetwork secondary range, used
+                when adding an alias IP range to a VM instance. The name must
+                be 1-63 characters long, and comply with RFC1035. The name
+                must be unique within the subnetwork.
+            - !ruby/object:Api::Type::String
+              name: 'ipCidrRange'
+              required: true
+              description: |
+                The range of IP addresses belonging to this subnetwork secondary
+                range. Provide this property when you create the subnetwork.
+                Ranges must be unique and non-overlapping with all primary and
+                secondary IP ranges within a network. Only IPv4 is supported.
       - !ruby/object:Api::Type::Boolean
         name: 'privateIpGoogleAccess'
         description: |
           Whether the VMs in this subnet can access Google services without
           assigned external IP addresses.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
         imports: 'name'
         description: |
-          URL of the region where the regional address resides.
-          This field is not applicable to global addresses.
+          URL of the GCP region for this subnetwork.
         required: true
         input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Private Google Access':
+          'https://cloud.google.com/vpc/docs/configure-private-google-access'
+        'Cloud Networking':
+          'https://cloud.google.com/vpc/docs/using-vpc'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/subnetworks'
+
   - !ruby/object:Api::Resource
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
@@ -2900,6 +3241,22 @@ objects:
           character, which cannot be a dash.
         input: true
         required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'quicOverride'
+        description: |
+          Specifies the QUIC override policy for this resource. This determines
+          whether the load balancer will attempt to negotiate QUIC with clients
+          or not. Can specify one of NONE, ENABLE, or DISABLE. If NONE is
+          specified, uses the QUIC policy with no user overrides, which is
+          equivalent to DISABLE. Not specifying this field is equivalent to
+          specifying NONE.
+        values:
+          - :NONE
+          - :ENABLE
+          - :DISABLE
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/global/targetHttpsProxies/{{name}}/setQuicOverride'
       - !ruby/object:Api::Type::Array
         name: 'sslCertificates'
         description: |
@@ -2916,16 +3273,6 @@ objects:
           imports: 'selfLink'
           description: 'The SSL certificates used by this TargetHttpsProxy'
       - !ruby/object:Api::Type::ResourceRef
-        name: 'urlMap'
-        resource: 'UrlMap'
-        imports: 'selfLink'
-        description: |
-          A reference to the UrlMap resource that defines the mapping from URL
-          to the BackendService.
-        required: true
-        update_verb: :POST
-        update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
-      - !ruby/object:Api::Type::ResourceRef
         name: 'sslPolicy'
         # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
         exclude: true
@@ -2938,6 +3285,16 @@ objects:
         update_verb: :POST
         update_url:
           'projects/{{project}}/global/targetHttpsProxies/{{name}}/setSslPolicy'
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'urlMap'
+        resource: 'UrlMap'
+        imports: 'selfLink'
+        description: |
+          A reference to the UrlMap resource that defines the mapping from URL
+          to the BackendService.
+        required: true
+        update_verb: :POST
+        update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
   - !ruby/object:Api::Resource
     name: 'TargetPool'
     kind: 'compute#targetPool'
@@ -3137,7 +3494,20 @@ objects:
           name: 'sslCertificate'
           resource: 'SslCertificate'
           imports: 'selfLink'
-          description: 'The SSL certificates used by this TargetHttpsProxy'
+          description: 'The SSL certificates used by this TargetSslProxy'
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sslPolicy'
+        # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
+        exclude: true
+        resource: 'SslPolicy'
+        imports: 'selfLink'
+        description: |
+          A reference to the SslPolicy resource that will be associated with
+          the TargetSslProxy resource. If not set, the TargetSslProxy
+          resource will not have any SSL policy configured.
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/global/targetSslProxies/{{name}}/setSslPolicy'
   - !ruby/object:Api::Resource
     name: 'TargetTcpProxy'
     kind: 'compute#targetTcpProxy'
@@ -3202,7 +3572,6 @@ objects:
         update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
   - !ruby/object:Api::Resource
     name: 'TargetVpnGateway'
-    exclude: true
     kind: 'compute#targetVpnGateway'
     base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
     input: true
@@ -3414,7 +3783,7 @@ objects:
       - name
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
-    virtual: true
+    readonly: true
     description: 'Represents a Zone resource.'
     properties:
       - !ruby/object:Api::Type::Time

@@ -26,6 +26,17 @@ module Api
       attr_reader :description
       attr_reader :kind
       attr_reader :base_url
+      # URL to use for creating the resource. If not specified, the
+      # collection url (when create_verb is default or :POST) or
+      # self_link (when create_verb is :PUT) is used instead.
+      attr_reader :create_url
+      # URL to use to delete the resource. If not specified, the
+      # self link is used.
+      attr_reader :delete_url
+      # URL to use for updating the resource. If not specified, the self link
+      # will be used. This currently can only be used with Terraform resources.
+      # TODO(#302): Add support for the other providers.
+      attr_reader :update_url
       attr_reader :self_link
       # This is useful in case you need to change the query made for
       # GET/DELETE requests only.  In particular, this is often used
@@ -38,16 +49,16 @@ module Api
       # If empty, we assume that `name` is the identifier.
       attr_reader :identity
       attr_reader :exclude
-      attr_reader :virtual
       attr_reader :async
       attr_reader :readonly
       attr_reader :exports
-      attr_reader :label_override
       attr_reader :transport
       attr_reader :references
       attr_reader :create_verb
+      attr_reader :delete_verb
       attr_reader :update_verb
       attr_reader :input # If true, resource is not updatable as a whole unit
+      attr_reader :min_version # Minimum API version this resource is in
     end
 
     include Properties
@@ -195,7 +206,7 @@ module Api
     end
 
     def out_name
-      [@__product.prefix, Google::StringUtils.underscore(@name)].join('_')
+      [@__product.prefix, @name.underscore].join('_')
     end
 
     def identity
@@ -222,6 +233,9 @@ module Api
       super
       check_optional_property :async, Api::Async
       check_optional_property :base_url, String
+      check_optional_property :create_url, String
+      check_optional_property :delete_url, String
+      check_optional_property :update_url, String
       check_property :description, String
       check_optional_property :exclude, :boolean
       check_optional_property :kind, String
@@ -229,20 +243,18 @@ module Api
       check_optional_property :exports, Array
       check_optional_property :self_link, String
       check_optional_property :self_link_query, Api::Resource::ResponseList
-      check_optional_property :virtual, :boolean
       check_optional_property :readonly, :boolean
-      check_optional_property :label_override, String
       check_optional_property :transport, Transport
       check_optional_property :references, ReferenceLinks
 
       check_property :properties, Array unless @exclude
 
       check_property_oneof_default :create_verb, %i[POST PUT], :POST, Symbol
+      check_property_oneof_default :delete_verb, %i[POST DELETE], :DELETE, Symbol
       check_property_oneof_default \
         :update_verb, %i[POST PUT PATCH], :PUT, Symbol
       check_optional_property :input, :boolean
-
-      check_optional_property :input, :boolean
+      check_optional_property :min_version, String
 
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
@@ -261,6 +273,14 @@ module Api
 
     def parameters
       (@parameters || []).reject(&:exclude)
+    end
+
+    def exclude_if_not_in_version(version)
+      @exclude ||= version < min_version
+      @properties&.each { |p| p.exclude_if_not_in_version(version) }
+      @parameters&.each { |p| p.exclude_if_not_in_version(version) }
+
+      @exclude
     end
 
     # Returns all properties and parameters including the ones that are
@@ -291,7 +311,7 @@ module Api
     # Returns all of the properties that are a part of the self_link or
     # collection URLs
     def uri_properties
-      [@base_url, @__product.default_version.base_url].map do |url|
+      [@base_url, @__product.base_url].map do |url|
         parts = url.scan(/\{\{(.*?)\}\}/).flatten
         parts << 'name'
         parts.delete('project')
@@ -336,6 +356,75 @@ module Api
         || access_api_results
     end
 
+    def min_version
+      if @min_version.nil?
+        @__product.default_version
+      else
+        @__product.version_obj(@min_version)
+      end
+    end
+
+    # Returns self link in two parts - base_url + product_url
+    def self_link_url
+      base_url = @__product.base_url.split("\n").map(&:strip).compact
+      if @self_link.nil?
+        [base_url, [@base_url, '{{name}}'].join('/')]
+      else
+        self_link = @self_link.split("\n").map(&:strip).compact
+        [base_url, self_link]
+      end
+    end
+
+    def collection_url
+      [
+        @__product.base_url.split("\n").map(&:strip).compact,
+        @base_url.split("\n").map(&:strip).compact
+      ]
+    end
+
+    def async_operation_url
+      raise 'Not an async resource' if @async.nil?
+      [@__product.base_url, @async.operation.base_url]
+    end
+
+    def default_create_url
+      if @create_verb.nil? || @create_verb == :POST
+        collection_url
+      elsif @create_verb == :PUT
+        self_link_url
+      else
+        raise "unsupported create verb #{@create_verb}"
+      end
+    end
+
+    def full_create_url
+      if @create_url.nil?
+        default_create_url
+      else
+        [
+          @__product.base_url.split("\n").map(&:strip).compact,
+          @create_url
+        ]
+      end
+    end
+
+    def full_delete_url
+      if @delete_url.nil?
+        self_link_url
+      else
+        [
+          @__product.base_url.split("\n").map(&:strip).compact,
+          @delete_url
+        ]
+      end
+    end
+
+    # A regex to check if a full URL was returned or just a shortname.
+    def regex_url
+      self_link_url.join.gsub('{{project}}', '.*')
+                   .gsub('{{name}}', '[a-z1-9\-]*')
+    end
+
     private
 
     # Given an array of properties, return all ResourceRefs contained within
@@ -345,7 +434,6 @@ module Api
     #                     avoid self-referencing objects.
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/MethodLength
     # rubocop:disable Metrics/PerceivedComplexity
     def resourcerefs_for_properties(props, original_obj)
       rrefs = []
@@ -382,7 +470,6 @@ module Api
 
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/PerceivedComplexity
   end
   # rubocop:enable Metrics/ClassLength

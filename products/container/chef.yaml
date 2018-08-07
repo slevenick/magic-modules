@@ -21,18 +21,16 @@ manifest: !ruby/object:Provider::Chef::Manifest
     This cookbook provides the built-in types and services for Chef to manage
     Google Container Engine resources, as native Chef types.
   depends:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google-gauth'
-      versions: '< 0.2.0'
+<%= indent(compile('provider/chef/common~depends.yaml'), 4) %>
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
 overrides: !ruby/object:Provider::ResourceOverrides
   Cluster: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
-      - 'products/container/helpers/provider_cluster.rb'
+      - 'products/container/helpers/ruby/provider_cluster.rb'
   NodePool: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
-      - 'products/container/helpers/provider_node_pool.rb'
+      - 'products/container/helpers/ruby/provider_node_pool.rb'
   KubeConfig: !ruby/object:Provider::Chef::ResourceOverride
     manual: true
 examples: !ruby/object:Api::Resource::HashArray

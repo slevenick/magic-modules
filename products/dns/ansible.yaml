@@ -60,7 +60,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
                                     'dns#resourceRecordSetsListResponse',
                                     'rrsets')
     provider_helpers:
-      - 'products/dns/helpers/ansible_provider_resource_set.py.erb'
+      - 'products/dns/helpers/ansible/provider_resource_set.py.erb'
     hidden:
       - unwrap_resource
       - resource_to_request
@@ -73,6 +73,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:
+<%= lines(indent(compile('provider/ansible/common~copy.yaml'), 4)) -%>
   compile:
 <%= lines(indent(compile('provider/ansible/common~compile.yaml'), 4)) -%>
 tests: !ruby/object:Api::Resource::HashArray

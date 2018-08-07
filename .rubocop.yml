@@ -13,6 +13,9 @@ AllCops:
 Metrics/AbcSize:
   Max: 20
 
+Metrics/LineLength:
+  Max: 100
+
 # TODO(nelsonjr): Refactor this class and remove Rubocop exemptions below
 Metrics/ClassLength:
   Exclude:
@@ -29,7 +32,7 @@ Metrics/ModuleLength:
     - 'compile/core.rb'
 
 Metrics/MethodLength:
-  Max: 15
+  Max: 25
 
 Security/Eval:
   Exclude:

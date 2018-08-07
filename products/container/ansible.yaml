@@ -27,15 +27,16 @@ manifest: !ruby/object:Provider::Ansible::Manifest
 overrides: !ruby/object:Provider::ResourceOverrides
   Cluster: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
-      - 'products/container/helpers/provider_cluster.py'
+      - 'products/container/helpers/python/provider_cluster.py'
   KubeConfig: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   NodePool: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
-      - 'products/container/helpers/provider_node_pool.py'
+      - 'products/container/helpers/python/provider_node_pool.py'
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:
+<%= lines(indent(compile('provider/ansible/common~copy.yaml'), 4)) -%>
   compile:
 <%= lines(indent(compile('provider/ansible/common~compile.yaml'), 4)) -%>
 tests: !ruby/object:Api::Resource::HashArray

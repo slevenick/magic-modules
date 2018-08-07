@@ -13,6 +13,7 @@
 
 PROVIDER_FOLDERS = {
   ansible: 'build/ansible',
+  ansible_facts: 'build/ansible',
   puppet: 'build/puppet/%s',
   chef: 'build/chef/%s',
   terraform: 'build/terraform'
@@ -28,7 +29,7 @@ def modules_for_provider(provider)
   products = File.join(File.dirname(__FILE__), '..', 'products')
   files = Dir.glob("#{products}/**/#{provider}.yaml")
   files.map do |file|
-    match = file.match(%r{^.*products\/([a-z]*)\/.*yaml.*})
+    match = file.match(%r{^.*products\/([_a-z]*)\/.*yaml.*})
     match&.captures&.at(0)
   end.compact
 end

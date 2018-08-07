@@ -28,16 +28,21 @@ module Provider
       # c) short id w/o defaults: {{name}}
       #
       # Fields with default values are `project`, `region` and `zone`.
+      # rubocop:disable Metrics/AbcSize
       def import_id_formats(resource)
         if resource.import_format.nil? || resource.import_format.empty?
           underscored_base_url = resource.base_url.gsub(
-            /{{[[:word:]]+}}/
-          ) { |field_name| Google::StringUtils.underscore(field_name) }
+            /{{[[:word:]]+}}/, &:underscore
+          )
 
           # We assume that all resources have a name field
           id_formats = [underscored_base_url + '/{{name}}']
         else
           id_formats = resource.import_format
+        end
+
+        unless resource.id_format.nil? || resource.id_format == '{{name}}'
+          id_formats << resource.id_format
         end
 
         # short id: {{project}}/{{zone}}/{{name}}
@@ -50,6 +55,7 @@ module Provider
 
         (id_formats + [short_id_format, short_id_default_format]).uniq
       end
+      # rubocop:enable Metrics/AbcSize
     end
   end
 end

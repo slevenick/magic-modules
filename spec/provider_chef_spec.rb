@@ -58,7 +58,7 @@ describe Provider::Chef do
                           named_prop: 'anotherresource',
                           arrays: [:string_array]
 
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
     end
   end
 
@@ -103,7 +103,7 @@ describe Provider::Chef do
                           named_prop: 'anotherresource',
                           arrays: [:string_array]
 
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
       matched
     end
 
@@ -172,7 +172,6 @@ describe Provider::Chef do
   end
 
   # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
   def output_expectations_libraries(data)
     dw = dummy_writer
     output_file \

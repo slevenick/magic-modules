@@ -8,6 +8,12 @@ folder. For example all the sources for the Google Compute Engine are inside the
 When compiling a product you specify the path to the products folder with the
 `-p` parameter.
 
+Please refer to these documents for general guidelines on how to write Magic
+Modules code:
+
+  - [GOVERNANCE][governance]
+  - [Template SDK][template-sdk]
+
 
 ## Anatomy of a Product
 
@@ -77,6 +83,10 @@ Optional fields:
    corresponding API property we can use `field` to map the user facing name
    (specified by the `name` parameter) to the backend API (specified by the
    `field` parameter)
+-  `resource`: A resource this resource is dependent upon. See
+   [Api::Type::ResourceRef](#resource-ref).
+-  `imports`: An imported property from the dependent resource specified by
+   `resource`. See [Api::Type::ResourceRef](#resource-ref).
 
 Example:
 
@@ -151,7 +161,7 @@ Currently MM supports the following types:
 -  Api::Type::NameValues
 -  `Api::Type::NestedObject`: A composite field, composed of inner fields. This
    is used for structures that are nested.
--  `Api::Type::ResourceRef`: A reference to another object described in the
+-  <a id="resource-ref"></a>`Api::Type::ResourceRef`: A reference to another object described in the
    product. This is used to create strong relationship binding between the
    objects, where the generated code will make sure the object depended upon
    exists. A `ResourceRef` also specifies which property from the dependent
@@ -195,3 +205,5 @@ The following exports are allowed:
 
 [puppet-yaml]: docs/puppet.yaml.md
 [chef-yaml]: docs/chef.yaml.md
+[governance]: GOVERNANCE.md
+[template-sdk]: TEMPLATE_SDK.md

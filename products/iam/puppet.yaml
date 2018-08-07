@@ -24,16 +24,14 @@ manifest: !ruby/object:Provider::Puppet::Manifest
     - cloud
     - iam
   requires:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google/gauth'
-      versions: '>= 0.2.0 < 0.3.0'
+<%= indent(compile('provider/puppet/common~requires.yaml'), 4) %>
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
 # TODO(nelsonjr): Match all special behavior Puppet <=> Chef.
 overrides: !ruby/object:Provider::ResourceOverrides
   ServiceAccount: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      - 'products/iam/helpers/provider_service_account.rb'
+      - 'products/iam/helpers/ruby/provider_service_account.rb'
   ServiceAccountKey: !ruby/object:Provider::Puppet::ResourceOverride
     handlers: !ruby/object:Provider::Puppet::Handlers
       create: |
@@ -99,7 +97,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           raise "'path' parameter should be an absolute path." \
             unless (Pathname.new value).absolute?
     provider_helpers:
-      - 'products/iam/helpers/provider_service_account_key.rb.erb'
+      - 'products/iam/helpers/ruby/provider_service_account_key.rb.erb'
     requires:
       - base64
 examples: !ruby/object:Api::Resource::HashArray
@@ -111,11 +109,10 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_service_account_key.pp
 files: !ruby/object:Provider::Config::Files
   copy:
-<%= indent(include('provider/puppet/common~copy.yaml'), 4) %>
+<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
     # Client-side functions require 'google/authorization'
     spec/stubs/google/authorization.rb: templates/spec_lib_stub.rb.erb
   compile:
-    lib/google/object_store.rb: google/object_store.rb
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
 <% # common~compile~after.yaml should be the last line of compile: section -%>

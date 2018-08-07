@@ -12,7 +12,7 @@
 # limitations under the License.
 
 require 'simplecov'
-SimpleCov.start
+SimpleCov.start unless ENV['DISABLE_COVERAGE']
 
 RSpec.configure do |config|
   config.mock_with :mocha
@@ -62,4 +62,4 @@ end
 
 require 'pp'
 
-Google::LOGGER.info 'Runing tests'
+Google::LOGGER.info 'Running tests'

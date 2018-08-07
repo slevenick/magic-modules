@@ -27,7 +27,7 @@ manage VMs in Compute Engine, databases in Cloud SQL, Google Kubernetes Engine
 clusters, and so on.
 
 But given the breadth of products available in Google Cloud Platform, creating
-modules by hand is quickly becomes inefficient and costly. It would involve too
+modules by hand quickly becomes inefficient and costly. It would involve too
 much redundant engineering work and create too much code for a team to maintain.
 There is also the issue of explosion of modules, if you consider for
 comprehensive coverage: <code>
@@ -81,8 +81,14 @@ To see the full product list visit the [`products`](products/) folder.
 Magic Modules requires:
 
 - git (so you can checkout the code)
-- Ruby 2.0 or higher
+- Ruby 2.5
 - Bundler gem
+
+### Ruby
+
+Since Ruby 2.5 is not yet available in some common distributions, we recommend using
+`rbenv` to ensure that you are using the correct Ruby version.  If you see an error
+about `unexpected keyword_rescue`, that means you're using an older Ruby.
 
 ### Downloading code
 
@@ -112,6 +118,16 @@ We are now ready to compile a module!
 
 ## Compiling modules
 
+### Prerequisites
+
+Each module has its own set of prerequisites for successful compilation. It is
+advisable to read the documentation within a particular module's project
+repository before attempting compilation to ensure prerequisites are installed.
+A list of each module's repository URL can be retrieved via the following
+command:
+
+	git config --file .gitmodules --get-regexp url
+
 ### Compiling a single module
 
 Compiling a module is as easy as:
@@ -125,6 +141,7 @@ For example, to compile Google Compute Engine for Puppet, you invoke:
 And the generated code should be written to `build/puppet/compute`
 
 ### Compiling all modules
+
 The Rakefile can be used to compile all of the modules at once. The following
 rake command can be used to compile all modules for all providers or just
 a single provider.
@@ -174,7 +191,7 @@ Platform  | Tool    | Test command
 Puppet    | rspec   | bundle exec rspec
 Chef      | rspec   | bundle exec rspec
 Terraform | go test | make test, make testacc
-Ansible   | various | [instructions](https://docs.ansible.com/ansible/2.3/dev_guide/testing.html)
+Ansible   | various | [instructions](https://docs.ansible.com/ansible/devel/dev_guide/testing.html)
 
 
 For Terraform, copy the generated code into the main Terraform repo and run the
@@ -186,9 +203,13 @@ tests further.
 
 ## Creating or updating a module
 
+Please refer to [Governance][governance] for concepts and guidelines on how to
+develop Magic Modules code.
+
 Please refer to [Developer Guide][developer] for details on how to create a new
 product or update an existing one.
 
 
+[governance]: GOVERNANCE.md
 [developer]: DEVELOPER.md
 [philosophy]: docs/philosophy.md

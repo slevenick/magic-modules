@@ -24,10 +24,28 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.6'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
-objects: !ruby/object:Api::Resource::HashArray
+datasources: !ruby/object:Provider::ResourceOverrides
+  BucketAccessControl: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Bucket: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  ObjectAccessControl: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  DefaultObjectACL: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+overrides: !ruby/object:Provider::ResourceOverrides
+  Bucket: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      defaultObjectAcl: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+  ObjectAccessControl: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  DefaultObjectACL: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:
+<%= lines(indent(compile('provider/ansible/common~copy.yaml'), 4)) -%>
   compile:
 <%= lines(indent(compile('provider/ansible/common~compile.yaml'), 4)) -%>
 tests: !ruby/object:Api::Resource::HashArray

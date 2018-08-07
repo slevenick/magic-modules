@@ -24,11 +24,14 @@ manifest: !ruby/object:Provider::Puppet::Manifest
     - cloud
     - storage
   requires:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google/gauth'
-      versions: '>= 0.2.0 < 0.3.0'
+<%= indent(compile('provider/puppet/common~requires.yaml'), 4) %>
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
+overrides: !ruby/object:Provider::ResourceOverrides
+  DefaultObjectACL: !ruby/object:Provider::Puppet::ResourceOverride
+    properties:
+      bucket: !ruby/object:Provider::Puppet::PropertyOverride
+        input: true
 bolt_tasks:
   - !ruby/object:Provider::Puppet::BoltTask
     name: 'upload'
@@ -89,13 +92,16 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_bucket.pp
   BucketAccessControl:
     - bucket_access_control.pp
+  DefaultObjectACL:
+    - default_object_acl.pp
+  ObjectAccessControl:
+    - object_access_control.pp
 files: !ruby/object:Provider::Config::Files
   copy:
-<%= indent(include('provider/puppet/common~copy.yaml'), 4) %>
+<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
   compile:
-    lib/google/object_store.rb: google/object_store.rb
     lib/google/storage/api/gstorage_object.rb:
-      products/storage/helpers/api_gstorage_object.rb
+      products/storage/helpers/puppet/bolt/api_gstorage_object.erb
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
 <% # common~compile~after.yaml should be the last line of compile: section -%>

@@ -10,19 +10,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 # These files contains code that needs to be compiled before being delivered to
 # the final module tree structure:
-'lib/ansible/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'
-'lib/ansible/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'
-'lib/ansible/utils/module_docs_fragments/gcp.py':
-  'provider/ansible/gcp_doc_frag.py'
-'test/integration/cloud-config-gcp.yml.template':
-  'provider/ansible/test_template.yaml'
-'test/runner/lib/cloud/gcp.py': 'provider/ansible/gcp_integration_runner.py'
-'test/units/module_utils/gcp/test_gcp_utils.py': 'provider/ansible/test_gcp_utils.py'
+
 <% unless config.nil? -%>
 <%
+  version = api.version_obj_or_default(_version_name)
   # Overrides have not been assembled yet.
   overrides = config.overrides
   excludes = overrides.instance_variables
@@ -30,9 +23,10 @@
                       .map { |x| x.to_s.tr(':@', '') }
   object_names = api.objects
                     .select { |o| !excludes.include?(o.name) }
+                    .select { |o| !o.exclude_if_not_in_version(version) }
                     .map do |object|
                       ["gcp_#{object.__product.prefix[1..-1]}",
-                      Google::StringUtils.underscore(object.name)].join('_')
+                       object.name.underscore].join('_')
                     end
 -%>
 <% object_names.each do |obj_name| -%>

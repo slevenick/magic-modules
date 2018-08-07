@@ -22,7 +22,6 @@ module Provider
       end
 
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       #
       # Returns a hash representing the data expected in a POST call to GCP
       # Used for unit tests
@@ -63,16 +62,15 @@ module Provider
       private
 
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
       def expect_hash(prop, name_prop, has_name, seed = 0)
         if prop.name == 'name' && !has_name && !name_prop.empty?
-          "'#{name_prop[0].field_name}' => 'title#{seed}'"
+          "'#{name_prop[0].api_name}' => 'title#{seed}'"
         elsif prop.class <= Api::Type::Array
           expect_array_hash(prop)
         elsif prop.class <= Api::Type::NestedObject
-          ["'#{prop.field_name}' => {",
+          ["'#{prop.api_name}' => {",
            @provider.indent_list(
              prop.properties.map { |p| expect_hash(p, [], false, seed) }, 2
            ),
@@ -81,12 +79,12 @@ module Provider
           # All ResourceRefs should expect the fetched value
           # Without this, the JSON call will be expecting the title of the
           # ResourceRef block, not a value within that block.
-          ["'#{prop.field_name}'", '=>', value(prop.property.class,
-                                               prop.property,
-                                               seed)].join(' ')
+          ["'#{prop.api_name}'", '=>', value(prop.property.class,
+                                             prop.property,
+                                             seed)].join(' ')
         else
-          ["'#{prop.field_name}'", '=>', value(prop.class, prop,
-                                               seed)].join(' ')
+          ["'#{prop.api_name}'", '=>', value(prop.class, prop,
+                                             seed)].join(' ')
         end
       end
       # rubocop:enable Metrics/PerceivedComplexity
@@ -95,26 +93,25 @@ module Provider
       # rubocop:enable Metrics/AbcSize
 
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       def expect_array_hash(prop, seed = 0)
         if prop.item_type.class <= Api::Type::NestedObject
           [
-            ["'#{prop.field_name}'", '=>', '['].join(' '),
+            ["'#{prop.api_name}'", '=>', '['].join(' '),
             expect_array_item_hash(prop, seed),
             ']'
           ]
         elsif prop.item_type.class <= Api::Type::ResourceRef
           [
-            ["'#{prop.field_name}'", '=>', '['].join(' '),
+            ["'#{prop.api_name}'", '=>', '['].join(' '),
             expect_array_item_rref(prop, seed),
             ']'
           ]
         elsif prop.is_a? Api::Type::ResourceRef
-          "'#{prop.field_name}' => #{value(prop.property.class,
-                                           prop.property, seed)}"
+          "'#{prop.api_name}' => #{value(prop.property.class,
+                                         prop.property, seed)}"
         else
-          ["'#{prop.field_name}'", '=>', value(prop.class,
-                                               prop, seed)].join(' ')
+          ["'#{prop.api_name}'", '=>', value(prop.class,
+                                             prop, seed)].join(' ')
         end
       end
       # rubocop:enable Metrics/AbcSize
@@ -122,8 +119,8 @@ module Provider
 
       def expect_array_item_rref(item, seed = 0)
         size = @data_gen.object_size(item, seed, true)
-        imports = Google::StringUtils.underscore(item.item_type.imports)
-        resource = Google::StringUtils.underscore(item.item_type.resource)
+        imports = item.item_type.imports.underscore
+        resource = item.item_type.resource.underscore
         @provider.indent_list(
           (0..size - 1).map do |index|
             "'#{imports.tr('_', '')}(resource(#{resource},#{index}))'"
@@ -142,7 +139,7 @@ module Provider
              @provider.indent_list(
                item.item_type.properties.map do |prop|
                  if prop.is_a? Api::Type::NestedObject
-                   ["'#{prop.field_name}' => {",
+                   ["'#{prop.api_name}' => {",
                     @provider.indent_list(
                       prop.properties.map do |p|
                         expect_hash(p, [], false, seed + index - 1)
@@ -154,7 +151,7 @@ module Provider
                    # Without the JSON call will be expecting the title of the
                    # ResourceRef block, not a value within that block.
                    [
-                     "'#{prop.field_name}' =>",
+                     "'#{prop.api_name}' =>",
                      value(prop.property.class,
                            prop.property, (seed + index - 1) % MAX_ARRAY_SIZE)
                    ].join(' ')
@@ -162,7 +159,7 @@ module Provider
                    expect_array_hash(prop, (seed + index - 1))
                  else
                    [
-                     "'#{prop.field_name}'", '=>',
+                     "'#{prop.api_name}'", '=>',
                      value(prop.class, prop, seed + index - 1)
                    ].join(' ')
                  end

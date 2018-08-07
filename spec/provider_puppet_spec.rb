@@ -58,7 +58,7 @@ describe Provider::Puppet do
                           },
                           named_prop: 'anotherresource',
                           arrays: [:string_array]
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
     end
   end
 
@@ -94,7 +94,7 @@ describe Provider::Puppet do
                           type: { writer: out2, tester: out2 },
                           provider: { writer: out2, tester: out2 },
                           arrays: [:string_array]
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
     end
   end
 
@@ -143,7 +143,7 @@ describe Provider::Puppet do
                           },
                           named_prop: 'anotherresource',
                           arrays: [:string_array]
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
     end
   end
 
@@ -178,7 +178,7 @@ describe Provider::Puppet do
       output_expectations kind: 'myproduct', name: 'my_resource',
                           type: { writer: out, tester: out },
                           provider: { writer: provider_writer, tester: out }
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
       expect(collected).to contain_array(expected)
     end
   end
@@ -217,7 +217,7 @@ describe Provider::Puppet do
       output_expectations kind: 'myproduct', name: 'my_resource',
                           type: { writer: out, tester: out },
                           provider: { writer: provider_writer, tester: out }
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
       expect(matched).to eq expected
     end
   end
@@ -255,7 +255,7 @@ describe Provider::Puppet do
       output_expectations kind: 'myproduct', name: 'my_resource',
                           type: { writer: out, tester: out },
                           provider: { writer: provider_writer, tester: out }
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
       expect(matched).to eq expected
     end
   end
@@ -294,7 +294,7 @@ describe Provider::Puppet do
       output_expectations kind: 'myproduct', name: 'my_resource',
                           type: { writer: out, tester: out },
                           provider: { writer: provider_writer, tester: out }
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
       expect(matched).to eq []
     end
   end
@@ -323,7 +323,7 @@ describe Provider::Puppet do
                           type: { writer: out, tester: out },
                           provider: { writer: out, tester: out }
 
-      provider.generate 'blah', [type]
+      provider.generate 'blah', [type], nil
     end
   end
 
@@ -367,7 +367,7 @@ describe Provider::Puppet do
                             writer: out
                           },
                           arrays: [:string_array]
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
       matched
     end
 
@@ -415,7 +415,7 @@ describe Provider::Puppet do
                             writer: out
                           },
                           arrays: [:string_array]
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
       matched
     end
 
@@ -466,7 +466,7 @@ describe Provider::Puppet do
                           named_prop: 'anotherresource',
                           arrays: [:string_array]
 
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
       matched
     end
 
@@ -515,7 +515,7 @@ describe Provider::Puppet do
                           },
                           named_prop: 'anotherresource',
                           arrays: [:string_array]
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
       matched
     end
 
@@ -568,7 +568,6 @@ describe Provider::Puppet do
   end
 
   # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
   def output_expectations_resource_ref(data)
     rref_name = "#{data[:kind]}_#{data[:resourceref][:name]}"
     rref_file = [data[:resourceref][:name].tr('_', ''),
@@ -671,7 +670,7 @@ describe Provider::Puppet do
 
   def allow_open_spec_templates(rref = false)
     file_read_map 'templates/puppet/type.erb', 'spec/data/type_template.erb'
-    file_read_map 'templates/puppet/provider.erb', 'spec/data/prov_template.erb'
+    file_read_map 'templates/puppet/resource.erb', 'spec/data/prov_template.erb'
     file_read_map 'templates/puppet/provider_spec.erb',
                   'spec/data/prov_spec_template.erb'
     # 6 combinations of success1-3 and name/title
@@ -686,7 +685,7 @@ describe Provider::Puppet do
 
   def allow_open_real_templates
     allow_read 'templates/puppet/type.erb'
-    allow_read 'templates/puppet/provider.erb'
+    allow_read 'templates/puppet/resource.erb'
     allow_read 'templates/puppet/provider_spec.erb'
 
     allow_open 'templates/expand_variables.erb'

@@ -11,11 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'google/python_utils'
+
 module Provider
   module Ansible
     # Responsible for building out the AnsibleModule code.
     # AnsibleModule is responsible for input validation.
     module Module
+      include Google::PythonUtils
       # Returns the Python dictionary representing a simple property for
       # validation.
       def python_dict_for_property(prop, object, spaces = 0)
@@ -25,7 +28,7 @@ module Provider
         elsif prop.is_a? Api::Type::NestedObject
           nested_obj_dict(prop, object, prop.properties, spaces)
         else
-          name = Google::StringUtils.underscore(prop.out_name)
+          name = prop.out_name.underscore
           "#{name}=dict(#{prop_options(prop, object, spaces).join(', ')})"
         end
       end
@@ -35,7 +38,7 @@ module Provider
       # Creates a Python dictionary representing a nested object property
       # for validation.
       def nested_obj_dict(prop, object, properties, spaces)
-        name = Google::StringUtils.underscore(prop.out_name)
+        name = prop.out_name.underscore
         options = prop_options(prop, object, spaces).join(', ')
         [
           "#{name}=dict(#{options}, options=dict(",
@@ -48,10 +51,12 @@ module Provider
 
       # Returns an array of all base options for a given property.
       # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/AbcSize
       def prop_options(prop, _object, spaces)
         [
           ('required=True' if prop.required && !prop.default_value),
-          ("default=#{prop.default_value}" if prop.default_value),
+          ("default=#{python_literal(prop.default_value)}" \
+           if prop.default_value),
           "type=#{quote_string(python_type(prop))}",
           (choices_enum(prop, spaces) if prop.is_a? Api::Type::Enum),
           ("elements=#{quote_string(python_type(prop.item_type))}" \
@@ -61,12 +66,12 @@ module Provider
         ].compact
       end
       # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/AbcSize
 
       # Returns a formatted string represented the choices of an enum
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       def choices_enum(prop, spaces)
-        name = Google::StringUtils.underscore(prop.out_name)
+        name = prop.out_name.underscore
         type = "type=#{quote_string(python_type(prop))}"
         # + 6 for =dict(
         choices_indent = spaces + name.length + type.length + 6

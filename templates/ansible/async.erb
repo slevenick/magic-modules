@@ -4,7 +4,7 @@
   res_path = path2navigate(object.async.result.path)
 -%>
 <%=
-  lines(emit_link('async_op_url', async_operation_url(object), object, true), 2)
+  lines(emit_link('async_op_url', build_url(object.async_operation_url, true), object, true), 2)
 -%>
 def wait_for_operation(module, response):
 <% if object.kind? -%>
@@ -14,7 +14,7 @@ def wait_for_operation(module, response):
     op_result = return_if_object(module, response)
 <% end # object.kind? -%>
     if op_result is None:
-        return None
+        return {}
     status = navigate_hash(op_result, <%= stat_path -%>)
 <% if object.self_link_query.nil? -%>
     wait_done = wait_for_completion(status, op_result, module)
@@ -24,18 +24,19 @@ def wait_for_operation(module, response):
     return fetch_resource(module, navigate_hash(wait_done, <%= res_path -%>))
 <%   end # object.kind? -%>
 <% else # object.self_link_query.nil? -%>
-    wait_for_completion(status, op_result, resource)
+    wait_for_completion(status, op_result, module)
 <%=
+  obj_kind = quote_string(object.kind)
   lines(format(
     [
       [
-        "return fetch_wrapped_resource(resource, #{obj_kind}",
+        "return fetch_wrapped_resource(module, #{obj_kind},",
         ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?),
         "'#{object.self_link_query.items}')"
       ].join(' '),
       [
         [
-         "return fetch_wrapped_resource(resource, #{obj_kind}",
+         "return fetch_wrapped_resource(resource, #{obj_kind},",
          ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?)
         ].join(' '),
         indent([
@@ -43,7 +44,7 @@ def wait_for_operation(module, response):
         ], 23) # 23 = align with ( previous line
       ],
       [
-        "return fetch_wrapped_resource(resource, #{obj_kind}",
+        "return fetch_wrapped_resource(resource, #{obj_kind},",
         indent([
           "'#{object.self_link_query.kind}',",
           "'#{object.self_link_query.items}')"

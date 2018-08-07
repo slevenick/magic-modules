@@ -21,7 +21,7 @@
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
 gcompute_zone 'us-central1-a' do
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -32,13 +32,13 @@ gcompute_disk <%= example_resource_name('data-disk-1') -%> do
     raw_key: 'SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0='
   )
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
 <% end # name == README.md -%>
 gcompute_snapshot <%= example_resource_name('data-disk-snapshot-1') -%> do
-  action :create
+  action :delete
   snapshot_encryption_key(
     raw_key: 'VGhpcyBpcyBhbiBlbmNyeXB0ZWQgc25hcHNob3QhISE='
   )
@@ -47,6 +47,6 @@ gcompute_snapshot <%= example_resource_name('data-disk-snapshot-1') -%> do
   )
   source <%= example_resource_name('data-disk-1') %>
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

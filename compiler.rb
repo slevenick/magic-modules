@@ -24,6 +24,7 @@ Dir.chdir(File.dirname(__FILE__))
 ENV['TZ'] = 'UTC'
 
 require 'api/compiler'
+require 'google/logger'
 require 'optparse'
 require 'provider/ansible'
 require 'provider/ansible/bundle'
@@ -39,8 +40,10 @@ catalog = nil
 output = nil
 provider = nil
 types_to_generate = []
+version = nil
 
 ARGV << '-h' if ARGV.empty?
+Google::LOGGER.level = Logger::WARN
 
 OptionParser.new do |opt|
   opt.on('-p', '--product PRODUCT', 'Folder with product catalog') do |p|
@@ -55,9 +58,15 @@ OptionParser.new do |opt|
   opt.on('-t', '--type TYPE[,TYPE...]', Array, 'Types to generate') do |t|
     types_to_generate = t
   end
+  opt.on('-v', '--version VERSION', 'API version to generate') do |v|
+    version = v
+  end
   opt.on('-h', '--help', 'Show this message') do
     puts opt
     exit
+  end
+  opt.on('-d', '--debug', 'Show all debug logs') do |_debug|
+    Google::LOGGER.level = Logger::INFO
   end
 end.parse!
 
@@ -80,8 +89,8 @@ api = Api::Compiler.new(File.join(catalog, 'api.yaml')).run
 api.validate
 pp api if ENV['COMPILER_DEBUG']
 
-config = Provider::Config.parse(File.join(catalog, provider), api)
+config = Provider::Config.parse(File.join(catalog, provider), api, version)
 pp config if ENV['COMPILER_DEBUG']
 
 provider = config.provider.new(config, api)
-provider.generate output, types_to_generate
+provider.generate output, types_to_generate, version

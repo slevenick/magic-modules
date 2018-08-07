@@ -51,7 +51,8 @@ module Provider
         Api::Type::ResourceRef => 'schema.TypeString',
         Api::Type::NestedObject => 'schema.TypeList',
         Api::Type::Array => 'schema.TypeList',
-        Api::Type::NameValues => 'schema.TypeMap'
+        Api::Type::NameValues => 'schema.TypeMap',
+        Api::Type::Fingerprint => 'schema.TypeString'
       }
     end
 
@@ -61,23 +62,18 @@ module Provider
 
     def force_new?(property, resource)
       !property.output &&
-        (property.input || (resource.input && property.update_url.nil?))
+        (property.input || (resource.input && property.update_url.nil? &&
+                            (property.parent.nil? ||
+                             force_new?(property.parent, resource))))
     end
 
-    # Puts together the links to use to make API calls for a given resource type
-    def self_link_url(resource)
-      (product_url, resource_url) = self_link_raw_url(resource)
-      [product_url, resource_url].flatten.join
-    end
-
-    def collection_url(resource)
-      base_url = resource.base_url.split("\n").map(&:strip).compact
-      [resource.__product.default_version.base_url, base_url].flatten.join
+    def build_url(url_parts, _extra = false)
+      url_parts.flatten.join
     end
 
     def update_url(resource, url_part)
-      return self_link_url(resource) if url_part.nil?
-      [resource.__product.default_version.base_url, url_part].flatten.join
+      return build_url(resource.self_link_url) if url_part.nil?
+      [resource.__product.base_url, url_part].flatten.join
     end
 
     # Transforms a format string with field markers to a regex string with
@@ -131,8 +127,8 @@ module Provider
     def generate_resource(data)
       target_folder = File.join(data[:output_folder], 'google')
       FileUtils.mkpath target_folder
-      name = Google::StringUtils.underscore(data[:object].name)
-      product_name = Google::StringUtils.underscore(data[:product_name])
+      name = data[:object].name.underscore
+      product_name = data[:product_name].underscore
       filepath = File.join(target_folder, "resource_#{product_name}_#{name}.go")
       generate_resource_file data.clone.merge(
         default_template: 'templates/terraform/resource.erb',
@@ -148,8 +144,8 @@ module Provider
       target_folder = data[:output_folder]
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
-      name = Google::StringUtils.underscore(data[:object].name)
-      product_name = Google::StringUtils.underscore(data[:product_name])
+      name = data[:object].name.underscore
+      product_name = data[:product_name].underscore
       filepath =
         File.join(target_folder, "#{product_name}_#{name}.html.markdown")
       generate_resource_file data.clone.merge(
