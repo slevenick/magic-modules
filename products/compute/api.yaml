@@ -2088,7 +2088,8 @@ objects:
           [Output Only] The current status of whether or not this interconnect attachment
           is functional.
         output: true
-      - !ruby/object:Api::Type::String 
+        exclude: true
+      - !ruby/object:Api::Type::String
         name: 'router'
         description: |
           URL of the cloud router to be used for dynamic routing. This router must be in

@@ -55,8 +55,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         ].join(' ')
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_disk_type.rb'
-  InterconnectAttachment: !ruby/object:Provider::Puppet::ResourceOverride
-    broken_export_test: true
   Instance: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_instance.rb'
