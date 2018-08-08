@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'provider/resource_override'
+require 'provider/ansible/facts_override'
 
 module Provider
   module Ansible
@@ -31,6 +32,8 @@ module Provider
       attr_reader :unwrap_resource
       attr_reader :update
       attr_reader :version_added
+
+      attr_reader :facts
     end
 
     # Product specific overriden properties for Ansible
@@ -63,6 +66,9 @@ module Provider
         check_optional_property :update, ::String
         check_optional_property :unwrap_resource, :boolean
         check_optional_property :version_added, ::String
+
+        @facts ||= FactsOverride.new
+        check_property :facts, FactsOverride
       end
       # rubocop:enable Metrics/MethodLength
       # rubocop:enable Metrics/AbcSize
