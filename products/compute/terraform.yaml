@@ -1206,6 +1206,8 @@ files: !ruby/object:Provider::Config::Files
       'templates/terraform/tests/resource_compute_address_test.go'
     'google/resource_compute_autoscaler_test.go':
       'templates/terraform/tests/resource_compute_autoscaler_test.go'
+    'google/google/resource_compute_backend_bucket_signed_url_key_test.go.go':
+      'templates/terraform/tests/google/resource_compute_backend_bucket_signed_url_key_test.go.go'
     'google/resource_compute_global_address_test.go':
       'templates/terraform/tests/resource_compute_global_address_test.go'
     'google/resource_compute_region_autoscaler_test.go':
