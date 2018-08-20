@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/hashicorp/vault/helper/strutil"
 )
 
 func TestAccComputeBackendBucketSignedUrlKey_basic(t *testing.T) {
@@ -56,8 +55,12 @@ func testAccCheckComputeBackendBucketSignedUrlKeyDestroy(backendName string) res
 				return nil
 			}
 
-			if bucket.CdnPolicy != nil && strutil.StrListContains(bucket.CdnPolicy.SignedUrlKeyNames, rs.Primary.ID) {
-				return fmt.Errorf("backend bucket signed url key %s still exists", rs.Primary.ID)
+			if bucket.CdnPolicy != nil {
+				for _, keyName := range bucket.CdnPolicy.SignedUrlKeyNames {
+					if keyName == rs.Primary.ID {
+						return fmt.Errorf("backend bucket signed url key %s still exists", rs.Primary.ID)
+					}
+				}
 			}
 		}
 		return nil
@@ -88,8 +91,14 @@ func testAccCheckComputeBackendBucketKeysExists(backendBucketName string, keyNam
 			if rs.Primary.ID == "" {
 				return fmt.Errorf("No ID is set")
 			}
-			if !strutil.StrListContains(bucket.CdnPolicy.SignedUrlKeyNames, rs.Primary.ID) {
-				return fmt.Errorf("backend bucket %s signed url key %s not found", backendBucketName, rs.Primary.ID)
+			found := false
+			for _, keyName := range bucket.CdnPolicy.SignedUrlKeyNames {
+				if keyName == rs.Primary.ID {
+					found = true
+				}
+			}
+			if !found {
+				fmt.Errorf("backend bucket %s signed url key %s not found", backendBucketName, rs.Primary.ID)
 			}
 		}
 		return nil
