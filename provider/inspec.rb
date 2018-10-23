@@ -50,7 +50,7 @@ module Provider
       )
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/plural_resource.erb',
-        out_file: File.join(target_folder, "google_#{data[:product_name]}_#{name}s.rb")
+        out_file: File.join(target_folder, plural("google_#{data[:product_name]}_#{name}") + ".rb")
       )
     end
 
@@ -99,6 +99,10 @@ module Provider
                       data[:property].property_class.last
                     end
       )
+    end
+
+    def time?(property)
+      property.is_a?(::Api::Type::Time)
     end
 
     # Figuring out if a property is a primitive ruby type is a hassle. But it is important
@@ -156,6 +160,23 @@ module Provider
         'property',
         [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
       ).downcase
+    end
+
+    # InSpec doesn't need wrappers for primitives, so exclude them
+    def emit_requires(requires)
+      primitives = ['boolean', 'enum', 'string', 'time', 'integer', 'array', 'string_array', 'double']
+      requires.flatten.sort.uniq.reject{|r| primitives.include?(r.split('/').last)}.map { |r| "require '#{r}'" }.join("\n")
+    end
+
+    def plural(word)
+      # TODO use a real ruby gem for this? Pluralization is hard
+      if word[-1] == 's'
+        return word + 'es'
+      end
+      if word[-1] == 'y'
+        return word[0...-1] + 'ies'
+      end
+      return word + 's'
     end
   end
 end
