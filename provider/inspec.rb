@@ -82,6 +82,7 @@ module Provider
       end
 
       generate_properties(data.clone, data.object.all_user_properties)
+      gen_temp(data.clone, name, name.pluralize)
     end
 
     # Generate the IAM policy for this object. This is used to query and test
@@ -167,6 +168,17 @@ module Provider
       )
     end
 
+    def gen_temp(data, name, plural_name)
+      target_folder = File.join(data[:output_folder], 'generate')
+      generate_resource_file data.clone.merge(
+        name: "google_#{data[:product].api_name}_#{name}",
+        plural_name: "google_#{data[:product].api_name}_#{plural_name}",
+        p: '/Users/slevenick/workspace/iggy',
+        default_template: 'templates/inspec/gen.erb',
+        out_file: File.join(target_folder, "#{data[:product].api_name}_#{name}.rb")
+      )
+    end
+
     # Generates InSpec markdown documents for the resource
     def generate_documentation(data, base_name, plural)
       docs_folder = File.join(data.output_folder, 'docs', 'resources')
@@ -235,6 +247,10 @@ module Provider
 
     def time?(property)
       property.is_a?(::Api::Type::Time)
+    end
+
+    def array?(property)
+      (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
     end
 
     # Figuring out if a property is a primitive ruby type is a hassle. But it is important
@@ -383,6 +399,27 @@ module Provider
     def ga_api_url(object)
       ga_version = object.__product.version_obj_or_closest('ga')
       object.product_url || ga_version.base_url
+    end
+
+    def un_parse_code(property, nested = false)
+      if nested
+        path = "\#\{path\}.#{property.out_name}"
+      else
+        path = property.out_name
+      end
+        
+
+      return "[\"its('#{path}.to_s') { should cmp \#{x.inspect\} }\"]" if time?(property)
+      if array?(property)
+        return "x.map { |single| \"its('#{path}') { should include \#{single.inspect\} }\" }"
+      end
+
+      if primitive?(property)
+        return "[\"its('#{path}') { should cmp \#{x.inspect\} }\"]"
+      elsif typed_array?(property)
+        return "x.map { |single| \"its('#{path}') { should include '\#{single.to_json\}' }\" }"
+      end
+      "#{modularized_property_class(property)}.un_parse(x, \"#{path}\")"
     end
   end
 end

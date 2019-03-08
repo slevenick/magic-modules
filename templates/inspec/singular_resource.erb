@@ -47,6 +47,7 @@ class <%= object.__product.name.camelize(:upper) -%><%= object.name -%> < GcpRes
     @params = params
     @fetched = @connection.fetch(product_url(params[:beta]), resource_base_url, params, 'Get')
     parse unless @fetched.nil?
+    @params = params
   end
 <% else # object.nested_query.nil? -%>
   def initialize(params)
@@ -97,6 +98,34 @@ best_guess_identifier = extract_identifiers(individual_url).last
 -%>
   def to_s
     "<%= object.name -%> #{@params[:<%= best_guess_identifier -%>]}"
+  end
+
+  def un_parse
+    {
+<% object.all_user_properties.each do |prop| -%>
+      '<%= prop.out_name -%>' => ->(x, path) { x.nil? ? [] : <%= un_parse_code(prop, false) -%> },
+<% end # object.all_user_properties.each -%>
+    }
+  end
+
+  def dump(path, i)
+
+    name = '<%= object.name %>'
+
+    
+    arr = un_parse.map do |k, v|
+      v.call(method(k.to_sym).call, k)
+    end
+    my_map = {
+      name: name,
+      arr: arr,
+      type: '<%= resource_name(object, product_ns) -%>',
+      identifiers: @params,
+      number: i
+    }
+    File.open("#{path}/controls/#{name}_#{i}.rb", 'w') do |file|
+      file.write(ERB.new(File.read('/Users/slevenick/workspace/iggy/test.erb')).result_with_hash(my_map))
+    end
   end
 <% unless object&.additional_functions.nil? -%>
 

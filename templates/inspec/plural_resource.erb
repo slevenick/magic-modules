@@ -94,6 +94,58 @@ link_query_items = object&.nested_query&.keys&.first || object.collection_url_ke
   end
 <% end # has_time_prop -%>
 
+  def dump(path)
+    individual_url = '<%= format_url(object.self_link_url[1]) %>'
+    params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
+
+    my_result = []
+    i = 0
+    @table.each do |item|
+      combo = item.merge(@params)
+
+      parse = <%= object.name -%>.new(combo.merge({fake: true}))
+
+      item_identifiers = {}
+      params.each do |param|
+        item_identifiers[param.to_sym] = combo[param.to_sym]
+      end
+
+      cleaned_item = {}
+      item.each do |k, v|
+        cleaned_item[attrs[k]] = parse.method(attrs[k]).call if attrs.key?(k)
+      end
+
+      item_result = {item_identifiers: item_identifiers, item: cleaned_item, i: i}
+      my_result.push(item_result)
+
+      File.open("file_#{i}.rb", 'w') do |file|
+        file.write(ERB.new(File.read('test.erb')).result_with_hash(item_result))
+      end
+      i += 1
+    end
+  end
+
+  def identifiers
+    individual_url = '<%= format_url(object.self_link_url[1]) %>'
+    params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
+
+    my_result = []
+    i = 0
+    @table.each do |item|
+      combo = item.merge(@params)
+
+      parse = <%= object.name -%>.new(combo.merge({fake: true}))
+
+      item_identifiers = {}
+      params.each do |param|
+        item_identifiers[param.to_sym] = combo[param.to_sym]
+      end
+      my_result.push(item_identifiers)
+    end
+    my_result
+  end
+
+<% base = "'#{object.self_link_url[0].join}'" -%>
   private
 
 <%= compile('templates/inspec/product_url.erb') -%>

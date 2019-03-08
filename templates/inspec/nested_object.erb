@@ -36,11 +36,13 @@ module GoogleInSpec
 <% if property.nested_properties? -%>
 <% property.nested_properties.each do |prop| -%>
 
+        attr_reader :args
         attr_reader :<%= prop.out_name %>
 <% end # property.nested_properties.each -%>
 
 <% end # if property.nested_properties? -%>
         def initialize(args = nil, parent_identifier = nil)
+          @args = args
           return if args.nil?
           @parent_identifier = parent_identifier
 <% property.nested_properties.each do |prop| -%>
@@ -61,6 +63,32 @@ module GoogleInSpec
           time_string ? Time.parse(time_string) : nil
         end
 <% end # has_time_prop -%>
+
+        def self.un_parse(item, path)
+          return if item.nil?
+          way_to_parse = {
+<% property.nested_properties.each do |prop| -%>
+            '<%= prop.out_name -%>' => ->(x, path) { x.nil? ? [] : <%= un_parse_code(prop, true) -%> },
+<% end # object.all_user_properties.each -%>
+          }
+          way_to_parse.map do |k, v|
+            v.call(item.method(k).call, path)
+          end
+        end
+
+        def to_json
+          @args.to_json
+        end
+
+        def self.from_json string
+          data = JSON.load string
+          self.new data
+        end
+
+        # other is a string representation of this object
+        def ==(other)
+          return @args == JSON.load(other)
+        end
       end
 <% if property.is_a?(Api::Type::Array) -%>
 
@@ -69,6 +97,11 @@ module GoogleInSpec
           return if value.nil?
           return <%= class_name %>.new(value, parent_identifier) unless value.is_a?(::Array)
           value.map { |v| <%= class_name %>.new(v, parent_identifier) }
+        end
+
+        def self.un_parse(arr, path)
+          return if arr.nil?
+          value.map { |v| <%= class_name %>.un_parse(v, path) }
         end
       end
 <% end #if property is Array -%>
