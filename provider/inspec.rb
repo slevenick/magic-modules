@@ -253,6 +253,10 @@ module Provider
       (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
     end
 
+    def map?(property)
+      property.is_a?(Api::Type::Map) || property.is_a?(Api::Type::KeyValuePairs)
+    end
+
     # Figuring out if a property is a primitive ruby type is a hassle. But it is important
     # Fingerprints are strings, KeyValuePairs and Maps are hashes, and arrays of primitives are
     # arrays. Arrays of NestedObjects need to have their contents parsed and returned in an array
@@ -407,11 +411,14 @@ module Provider
       else
         path = property.out_name
       end
-        
 
-      return "[\"its('#{path}.to_s') { should cmp \#{x.inspect\} }\"]" if time?(property)
+      return "[\"its('#{path}.to_s') { should cmp '\#{x.inspect\}' }\"]" if time?(property)
       if array?(property)
         return "x.map { |single| \"its('#{path}') { should include \#{single.inspect\} }\" }"
+      end
+
+      if map?(property)
+        return "x.map { |k, v| \"its('#{path}') { should include(\#{k.inspect} => \#{v.inspect}) }\" }"
       end
 
       if primitive?(property)
