@@ -12,13 +12,46 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
 
 
 %>
+  plural_identifiers = [{project: 'graphite-test-outside'}]
 <% if params.include?('zone') %>
+  next_identifiers = []
   zone_names = google_compute_zones(project: 'graphite-test-outside').zone_names
   zone_names.each do |zone_name|
-    plural_identifiers.push({project: 'graphite-test-outside', zone: zone_name})
+    plural_identifiers.each do |plural_identifier|
+      next_identifiers.push(plural_identifier.merge({zone: zone_name}))
+    end
   end
-<% else %>
-  plural_identifiers.push({project: 'graphite-test-outside'})
+  plural_identifiers = next_identifiers
+<% end %>
+<% if params.include?('region') %>
+  next_identifiers = []
+  region_names = google_compute_regions(project: 'graphite-test-outside').region_names
+  region_names.each do |region_name|
+    plural_identifiers.each do |plural_identifier|
+      next_identifiers.push(plural_identifier.merge({region: region_name}))
+    end
+  end
+  plural_identifiers = next_identifiers
+<% end %>
+<% if params.include?('location') %>
+  next_identifiers = []
+  region_names = google_compute_regions(project: 'graphite-test-outside').region_names
+  region_names.each do |region_name|
+    plural_identifiers.each do |plural_identifier|
+      next_identifiers.push(plural_identifier.merge({location: region_name}))
+    end
+  end
+  plural_identifiers = next_identifiers
+<% end %>
+<% if params.include?('managed_zone') %>
+  next_identifiers = []
+  managed_zones = google_dns_managed_zones(project: 'graphite-test-outside').zone_names
+  managed_zones.each do |managed_zone|
+    plural_identifiers.each do |plural_identifier|
+      next_identifiers.push(plural_identifier.merge({managed_zone: managed_zone}))
+    end
+  end
+  plural_identifiers = next_identifiers
 <% end %>
   i = 0
   plural_identifiers.each do |plural_identifier|
