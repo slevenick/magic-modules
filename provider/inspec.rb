@@ -404,29 +404,5 @@ module Provider
       ga_version = object.__product.version_obj_or_closest('ga')
       object.product_url || ga_version.base_url
     end
-
-    def un_parse_code(property, nested = false)
-      if nested
-        path = "\#\{path\}.#{property.out_name}"
-      else
-        path = property.out_name
-      end
-
-      return "[\"its('#{path}.to_s') { should cmp '\#{x.inspect\}' }\"]" if time?(property)
-      if array?(property)
-        return "x.map { |single| \"its('#{path}') { should include \#{single.inspect\} }\" }"
-      end
-
-      if map?(property)
-        return "x.map { |k, v| \"its('#{path}') { should include(\#{k.inspect} => \#{v.inspect}) }\" }"
-      end
-
-      if primitive?(property)
-        return "[\"its('#{path}') { should cmp \#{x.inspect\} }\"]"
-      elsif typed_array?(property)
-        return "x.map { |single| \"its('#{path}') { should include '\#{single.to_json\}' }\" }"
-      end
-      "#{modularized_property_class(property)}.un_parse(x, \"#{path}\")"
-    end
   end
 end
