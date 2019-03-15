@@ -10,7 +10,9 @@ control '<%= name -%>-1.0' do
   plural_identifiers = []
 
   filters = []
-  file_name = File.join(ENV["CNF_PATH"], "<%= name %>.yaml")
+  config_folder = ENV["CNF_PATH"]
+  raise "Undefined configuration folder path" if config_folder.nil?
+  file_name = File.join(config_folder, "<%= name %>.yaml")
   if File.file?(file_name)
     config = YAML::load_file(file_name)
     config_filters = config['filters']
@@ -74,7 +76,7 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     identifiers.each do |identifier|
       resource = <%= name -%>(identifier)
       if filters.all? { |filter| filter.call(resource) }
-        resource.dump('<%= p -%>', i)
+        resource.dump('<%= target_path -%>', i)
         i += 1
       end
     end

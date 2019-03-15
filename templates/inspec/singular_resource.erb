@@ -127,6 +127,10 @@ best_guess_identifier = extract_identifiers(individual_url).last
       file.write(ERB.new(File.read('/Users/slevenick/workspace/iggy/test.erb')).result_with_hash(my_map))
     end
   end
+<% if generate -%>
+<%= lines(indent(compile('templates/inspec/generate/singular_generate_code.erb'), 2)) -%>
+
+<% end -%>
 <% unless object&.additional_functions.nil? -%>
 
 <%= lines(indent(compile(object.additional_functions), 2)) -%>

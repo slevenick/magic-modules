@@ -249,8 +249,8 @@ module Provider
       property.is_a?(::Api::Type::Time)
     end
 
-    def array?(property)
-      (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
+    def primitive_array?(property)
+      property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject)
     end
 
     def map?(property)
@@ -262,12 +262,9 @@ module Provider
     # arrays. Arrays of NestedObjects need to have their contents parsed and returned in an array
     # ResourceRefs are strings
     def primitive?(property)
-      array_primitive = (property.is_a?(Api::Type::Array)\
-        && !property.item_type.is_a?(::Api::Type::NestedObject))
       property.is_a?(::Api::Type::Primitive)\
-        || array_primitive\
-        || property.is_a?(::Api::Type::KeyValuePairs)\
-        || property.is_a?(::Api::Type::Map)\
+        || primitive_array?(property)\
+        || map?(property)\
         || property.is_a?(::Api::Type::Fingerprint)\
         || property.is_a?(::Api::Type::ResourceRef)
     end

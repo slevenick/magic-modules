@@ -17,42 +17,30 @@ module Provider
   # Code generator for Inspec test generation
   class InspecGenerate < Provider::Inspec
     def generate_resource(data)
-      version = @api.version_obj_or_default(data[:version])
-      examples = data[:object].examples
-                              .reject(&:skip_test)
-                              .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
-                              .reject { |e| version < @api.version_obj_or_default(e.min_version) }
-
-      examples.each do |example|
-        target_folder = data[:output_folder]
-        target_folder = File.join(target_folder, example.name)
-        FileUtils.mkpath target_folder
-
-        generate_resource_file data.clone.merge(
-          example: example,
-          default_template: 'templates/terraform/examples/base_configs/example_file.tf.erb',
-          out_file: File.join(target_folder, 'main.tf')
-        )
-
-        generate_resource_file data.clone.merge(
-          example: example,
-          default_template: 'templates/terraform/examples/base_configs/tutorial.md.erb',
-          out_file: File.join(target_folder, 'tutorial.md')
-        )
-
-        generate_resource_file data.clone.merge(
-          default_template: 'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
-          out_file: File.join(target_folder, 'backing_file.tf')
-        )
-
-        generate_resource_file data.clone.merge(
-          default_template: 'templates/terraform/examples/static/motd',
-          out_file: File.join(target_folder, 'motd')
-        )
-      end
+      data = data.merge({generate: true})
+      super(data)
+      name = data[:object].name.underscore
+      generate_generation_template(data, name, name.pluralize)
     end
 
+    def generate_generation_template(data, name, plural_name)
+      target_folder = File.join(data[:output_folder], 'generate')
+      target_path = File.join(data[:output_folder], 'test/integration/verify/controls')
+      generate_resource_file data.clone.merge(
+        name: "google_#{data[:product].api_name}_#{name}",
+        plural_name: "google_#{data[:product].api_name}_#{plural_name}",
+        target_path: '/Users/slevenick/workspace/iggy',
+        default_template: 'templates/inspec/generate/generate.erb',
+        out_file: File.join(target_folder, "#{data[:product].api_name}_#{name}.rb")
+      )
+    end
+
+    # Returns ruby code that can turn the specified property into an array of 
+    # InSpec assertions to test the value of that property for a given object
+
     def un_parse_code(property, nested = false)
+      # If this is a nested object we must qualify the path with the previous path
+      # This #{path} will be filled in later, as we traverse the object.
       if nested
         path = "\#\{path\}.#{property.out_name}"
       else
@@ -60,17 +48,20 @@ module Provider
       end
 
       return "[\"its('#{path}.to_s') { should cmp '\#{x.inspect\}' }\"]" if time?(property)
-      if array?(property)
+      if primitive_array?(property)
+        # TODO(slevenick): This does not test that the array ONLY includes these items
         return "x.map { |single| \"its('#{path}') { should include \#{single.inspect\} }\" }"
       end
 
       if map?(property)
+        # TODO(slevenick): This does not test that the map ONLY includes these items
         return "x.map { |k, v| \"its('#{path}') { should include(\#{k.inspect} => \#{v.inspect}) }\" }"
       end
 
       if primitive?(property)
         return "[\"its('#{path}') { should cmp \#{x.inspect\} }\"]"
       elsif typed_array?(property)
+        # TODO(slevenick): This does not test that the array ONLY includes these items
         return "x.map { |single| \"its('#{path}') { should include '\#{single.to_json\}' }\" }"
       end
       "#{modularized_property_class(property)}.un_parse(x, \"#{path}\")"
