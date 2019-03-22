@@ -76,7 +76,7 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     identifiers.each do |identifier|
       resource = <%= name -%>(identifier)
       if filters.all? { |filter| filter.call(resource) }
-        resource.dump('<%= target_path -%>', i)
+        resource.dump(ENV["OUTPUT_PATH"], i)
         i += 1
       end
     end
