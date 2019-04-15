@@ -33,7 +33,7 @@ module Provider
       data_clone.target_name = '/Users/slevenick/workspace/iggy'
       data_clone.default_template = 'templates/inspec/generate/generate.erb'
       data_clone.out_file = File.join(target_folder, "#{data.product.api_name}_#{name}.rb")
-      generate_resource_file data_clone
+      data_clone.generate('templates/inspec/generate/generate.erb', data_clone.out_file, self)
     end
 
     # Returns ruby code that can turn the specified property into an array of 
