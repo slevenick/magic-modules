@@ -51,6 +51,16 @@ module Provider
       # If this is a privileged resource, which will make integration tests unusable
       # unless the user is an admin of the GCP organization
       attr_accessor :privileged
+
+
+      # Generate stuff
+      attr_accessor :do_generate
+
+      attr_accessor :plural_name
+      attr_accessor :target_name
+      attr_accessor :default_template
+      attr_accessor :output_folder
+      attr_accessor :out_file
     end
 
     # Subclass of ProductFileTemplate with InSpec specific fields
@@ -82,7 +92,6 @@ module Provider
       end
 
       generate_properties(data.clone, data.object.all_user_properties)
-      gen_temp(data.clone, name, name.pluralize)
     end
 
     # Generate the IAM policy for this object. This is used to query and test
@@ -165,17 +174,6 @@ module Provider
         @config,
         version,
         build_env
-      )
-    end
-
-    def gen_temp(data, name, plural_name)
-      target_folder = File.join(data[:output_folder], 'generate')
-      generate_resource_file data.clone.merge(
-        name: "google_#{data[:product].api_name}_#{name}",
-        plural_name: "google_#{data[:product].api_name}_#{plural_name}",
-        p: '/Users/slevenick/workspace/iggy',
-        default_template: 'templates/inspec/gen.erb',
-        out_file: File.join(target_folder, "#{data[:product].api_name}_#{name}.rb")
       )
     end
 

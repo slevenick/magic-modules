@@ -94,7 +94,7 @@ link_query_items = object&.nested_query&.keys&.first || object.collection_url_ke
   end
 <% end # has_time_prop -%>
 
-<% if generate -%>
+<% if do_generate -%>
 <%= lines(indent(compile('templates/inspec/generate/plural_generate_code.erb'), 2)) -%>
 <% end -%>
 

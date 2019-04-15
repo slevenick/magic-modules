@@ -100,7 +100,7 @@ best_guess_identifier = extract_identifiers(individual_url).last
     "<%= object.name -%> #{@params[:<%= best_guess_identifier -%>]}"
   end
 
-<% if generate -%>
+<% if do_generate -%>
 <%= lines(indent(compile('templates/inspec/generate/singular_generate_code.erb'), 2)) -%>
 
 <% end -%>
