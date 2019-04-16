@@ -6,12 +6,13 @@ def un_parse
   }
 end
 
-def dump(path, i)
+def dump(path, i, ignored_fields)
 
   name = '<%= object.name %>'
 
   
   arr = un_parse.map do |k, v|
+    next if ignored_fields.include?(k)
     v.call(method(k.to_sym).call, k)
   end
   my_map = {
@@ -21,7 +22,7 @@ def dump(path, i)
     identifiers: @params,
     number: i
   }
-  File.open("#{path}/controls/#{name}_#{i}.rb", 'w') do |file|
+  File.open("#{path}/#{name}_#{i}.rb", 'w') do |file|
     file.write(ERB.new(File.read(ENV["TEMPLATE_PATH"])).result_with_hash(my_map))
   end
 

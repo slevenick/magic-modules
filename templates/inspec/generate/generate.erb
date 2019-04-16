@@ -1,5 +1,4 @@
 require 'yaml'
-require 'byebug'
 title 'Test GCP <%= name -%> resource.'
 
 
@@ -10,6 +9,7 @@ control '<%= name -%>-1.0' do
   plural_identifiers = []
 
   filters = []
+  ignored_fields = []
   config_folder = ENV["CNF_PATH"]
   raise "Undefined configuration folder path" if config_folder.nil?
   file_name = File.join(config_folder, "<%= name %>.yaml")
@@ -20,6 +20,8 @@ control '<%= name -%>-1.0' do
       filter = eval "lambda { |resource| #{filter_string} }"
       filters.push(filter)
     end
+    config_ignored = config['ignore']
+    ignored_fields += config_ignored
   end
   project_name = ENV["GCP_PROJECT_NAME"]
   raise "Undefined project name" if project_name.nil?
@@ -76,7 +78,7 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     identifiers.each do |identifier|
       resource = <%= name -%>(identifier)
       if filters.all? { |filter| filter.call(resource) }
-        resource.dump(ENV["OUTPUT_PATH"], i)
+        resource.dump(ENV["OUTPUT_PATH"], i, ignored_fields)
         i += 1
       end
     end
