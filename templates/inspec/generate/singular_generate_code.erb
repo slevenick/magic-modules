@@ -6,7 +6,7 @@ def un_parse
   }
 end
 
-def dump(path, i, ignored_fields)
+def dump(path, template_path, i, ignored_fields)
 
   name = '<%= object.name %>'
 
@@ -23,7 +23,7 @@ def dump(path, i, ignored_fields)
     number: i
   }
   File.open("#{path}/#{name}_#{i}.rb", 'w') do |file|
-    file.write(ERB.new(File.read(ENV["TEMPLATE_PATH"])).result_with_hash(my_map))
+    file.write(ERB.new(File.read(template_path)).result_with_hash(my_map))
   end
 
 
