@@ -33,10 +33,11 @@ module GoogleInSpec
   module <%= product_ns %>
     module Property
       class <%= class_name -%>
+
+        attr_reader :args
 <% if property.nested_properties? -%>
 <% property.nested_properties.each do |prop| -%>
 
-        attr_reader :args
         attr_reader :<%= prop.out_name %>
 <% end # property.nested_properties.each -%>
 
