@@ -1,10 +1,12 @@
 require 'yaml'
-title 'Test GCP <%= name -%> resource.'
+
+<% resource_name = resource_name(object, product_ns) -%>
+title 'Test GCP <%= resource_name -%> resource.'
 
 
-control '<%= name -%>-1.0' do
+control '<%= resource_name -%>-1.0' do
   impact 1.0
-  title '<%= name -%> resource test'
+  title '<%= resource_name -%> resource test'
 
   plural_identifiers = []
 
@@ -16,7 +18,7 @@ control '<%= name -%>-1.0' do
   raise "Undefined output folder path at variable TEMPLATE_PATH" if template_path.nil?
   config_folder = ENV["CNF_PATH"]
   raise "Undefined configuration folder path at variable CNF_PATH" if config_folder.nil?
-  file_name = File.join(config_folder, "<%= name %>.yaml")
+  file_name = File.join(config_folder, "<%= resource_name %>.yaml")
   if File.file?(file_name)
     config = YAML::load_file(file_name)
     config_filters = config['filters']
@@ -76,13 +78,18 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
 <% end %>
   i = 0
   plural_identifiers.each do |plural_identifier|
-    plural = <%= name.pluralize -%>(plural_identifier)
+    plural = <%= resource_name.pluralize -%>(plural_identifier)
     identifiers = plural.identifiers
     
     identifiers.each do |identifier|
-      resource = <%= name -%>(identifier)
+      resource = <%= resource_name -%>(identifier)
       if filters.all? { |filter| filter.call(resource) }
         resource.dump(output_folder, template_path, i, ignored_fields)
+        
+        output = "Writing #{output_folder}<%= object.name -%>_#{i}.rb"
+        describe output do
+          it { should match /test/ }
+        end   
         i += 1
       end
     end

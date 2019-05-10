@@ -56,11 +56,8 @@ module Provider
       # Generate stuff
       attr_accessor :do_generate
 
-      attr_accessor :plural_name
-      attr_accessor :target_name
-      attr_accessor :default_template
       attr_accessor :output_folder
-      attr_accessor :out_file
+      attr_accessor :original_name
     end
 
     # Subclass of ProductFileTemplate with InSpec specific fields

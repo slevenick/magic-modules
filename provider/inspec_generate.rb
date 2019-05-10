@@ -19,21 +19,17 @@ module Provider
     def generate_resource(data)
       data.do_generate = true
       super(data)
-      name = data.object.name.underscore
-      generate_generation_template(data, name, name.pluralize)
+      generate_generation_template(data)
     end
 
-    def generate_generation_template(data, name, plural_name)
+    def generate_generation_template(data)
       target_folder = File.join(data.output_folder, 'generate')
       target_path = File.join(data.output_folder, 'test/integration/verify/controls')
-
+      
+      name = data.object.name.underscore
       data_clone = data.clone
-      data_clone.name = "google_#{data.product.api_name}_#{name}"
-      data_clone.plural_name = "google_#{data.product.api_name}_#{plural_name}"
-      data_clone.target_name = '/Users/slevenick/workspace/iggy'
-      data_clone.default_template = 'templates/inspec/generate/generate.erb'
-      data_clone.out_file = File.join(target_folder, "#{data.product.api_name}_#{name}.rb")
-      data_clone.generate('templates/inspec/generate/generate.erb', data_clone.out_file, self)
+      out_file = File.join(target_folder, "#{data.product.api_name}_#{name}.rb")
+      data_clone.generate('templates/inspec/generate/generate.erb', out_file, self)
     end
 
     # Returns ruby code that can turn the specified property into an array of 
