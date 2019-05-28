@@ -76,13 +76,16 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
   end
   plural_identifiers = next_identifiers
 <% end %>
+  all_identifiers = []
   i = 0
   plural_identifiers.each do |plural_identifier|
     plural = <%= resource_name.pluralize -%>(plural_identifier)
     identifiers = plural.identifiers
     
     identifiers.each do |identifier|
+      all_identifiers.push(identifier)
       resource = <%= resource_name -%>(identifier)
+
       if filters.all? { |filter| filter.call(resource) }
         resource.dump(output_folder, template_path, i, ignored_fields)
         
@@ -93,5 +96,10 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
         i += 1
       end
     end
+  end
+
+  all_ids_name = '<%= resource_name -%>_identifiers.json'
+  File.open("#{output_folder}/#{all_ids_name}", 'w') do |file|
+    file.write(all_identifiers.to_json)
   end
 end
