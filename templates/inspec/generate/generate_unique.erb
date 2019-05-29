@@ -1,12 +1,64 @@
-title 'Test GCP <%= name %> resource.'
+require 'yaml'
+require 'logger'
 
-control '<%= name %>_<%= number %>' do
+<% resource_name = resource_name(object, product_ns) -%>
+title 'Test GCP <%= resource_name -%> resource.'
+
+
+control '<%= resource_name -%>-1.0' do
   impact 1.0
-  title '<%= name %> resource test'
+  title '<%= resource_name -%> resource test'
 
-  describe <%= type %>(<%= identifiers %>) do
-    it { should exist }
-<% arr.flatten.each do |a| %>
-    <%= a %><% end %>
+  project_name = ENV["GCP_PROJECT_NAME"]
+  raise "Undefined project name" if project_name.nil?
+  plural_identifiers = [{project: project_name}]
+<% 
+individual_url = format_url(object.self_link_url)
+params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] } 
+%>
+<% if params.include?('zone') %>
+  next_identifiers = []
+  zone_names = google_compute_zones(project: project_name).zone_names
+  zone_names.each do |zone_name|
+    plural_identifiers.each do |plural_identifier|
+      next_identifiers.push(plural_identifier.merge({zone: zone_name}))
+    end
   end
-end
+  plural_identifiers = next_identifiers
+<% end %>
+<% if params.include?('region') %>
+  next_identifiers = []
+  region_names = google_compute_regions(project: project_name).region_names
+  region_names.each do |region_name|
+    plural_identifiers.each do |plural_identifier|
+      next_identifiers.push(plural_identifier.merge({region: region_name}))
+    end
+  end
+  plural_identifiers = next_identifiers
+<% end %>
+<% if params.include?('location') %>
+  next_identifiers = []
+  region_names = google_compute_regions(project: project_name).region_names
+  region_names.each do |region_name|
+    plural_identifiers.each do |plural_identifier|
+      next_identifiers.push(plural_identifier.merge({location: region_name}))
+    end
+  end
+  plural_identifiers = next_identifiers
+<% end %>
+<% if params.include?('managed_zone') %>
+  next_identifiers = []
+  managed_zones = google_dns_managed_zones(project: project_name).zone_names
+  managed_zones.each do |managed_zone|
+    plural_identifiers.each do |plural_identifier|
+      next_identifiers.push(plural_identifier.merge({managed_zone: managed_zone}))
+    end
+  end
+  plural_identifiers = next_identifiers
+<% end %>
+  all_identifiers = []
+  i = 0
+  plural_identifiers.each do |plural_identifier|
+    plural = <%= resource_name.pluralize -%>(plural_identifier)
+    identifiers = plural.identifiers
+    

@@ -1,4 +1,5 @@
 require 'yaml'
+require 'logger'
 
 <% resource_name = resource_name(object, product_ns) -%>
 title 'Test GCP <%= resource_name -%> resource.'
@@ -10,30 +11,41 @@ control '<%= resource_name -%>-1.0' do
 
   plural_identifiers = []
 
+  logger = Logger.new(STDOUT)
+  logger.level = Logger::WARN
+  logger.warn("Generating tests for <%= resource_name -%>")
   filters = []
   ignored_fields = []
   output_folder = ENV["OUTPUT_PATH"]
-  raise "Undefined output folder path at variable OUTPUT_PATH" if output_folder.nil?
-  template_path = ENV["TEMPLATE_PATH"]
-  raise "Undefined output folder path at variable TEMPLATE_PATH" if template_path.nil?
+  
+  if output_folder.nil?
+    
+    output_folder = File.join(File.dirname(__FILE__), '../../generated_tests')
+    logger.warn("Undefined output folder path at variable OUTPUT_PATH. Defaulting to #{File.expand_path(output_folder)}")
+  end
+
+  Dir.mkdir(output_folder) unless File.exists?(output_folder)
+  template_path = File.join(File.dirname(__FILE__), '../../generated_test_template.erb')
   config_folder = ENV["CNF_PATH"]
-  raise "Undefined configuration folder path at variable CNF_PATH" if config_folder.nil?
-  file_name = File.join(config_folder, "<%= resource_name %>.yaml")
-  if File.file?(file_name)
-    config = YAML::load_file(file_name)
-    config_filters = config['filters']
-    config_filters.each do |filter_string|
-      filter = eval "lambda { |resource| #{filter_string} }"
-      filters.push(filter)
+  logger.warn("Undefined configuration folder path at variable CNF_PATH. Ignoring configuration files")
+  unless config_folder.nil?
+    file_name = File.join(config_folder, "<%= resource_name %>.yaml")
+    if File.file?(file_name)
+      config = YAML::load_file(file_name)
+      config_filters = config['filters']
+      config_filters.each do |filter_string|
+        filter = eval "lambda { |resource| #{filter_string} }"
+        filters.push(filter)
+      end
+      config_ignored = config['ignore']
+      ignored_fields += config_ignored
     end
-    config_ignored = config['ignore']
-    ignored_fields += config_ignored
   end
   project_name = ENV["GCP_PROJECT_NAME"]
   raise "Undefined project name" if project_name.nil?
   plural_identifiers = [{project: project_name}]
 <% 
-individual_url = format_url(object.self_link_url[1])
+individual_url = format_url(object.self_link_url)
 params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] } 
 %>
 <% if params.include?('zone') %>
@@ -89,7 +101,7 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
       if filters.all? { |filter| filter.call(resource) }
         resource.dump(output_folder, template_path, i, ignored_fields)
         
-        output = "Writing #{output_folder}<%= object.name -%>_#{i}.rb"
+        output = "Writing #{File.expand_path(output_folder)}/<%= object.name -%>_#{i}.rb"
         describe output do
           it { should match /test/ }
         end   
