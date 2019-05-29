@@ -111,7 +111,7 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
   end
 
   all_ids_name = '<%= resource_name -%>_identifiers.json'
-  File.open("#{output_folder}/#{all_ids_name}", 'w') do |file|
-    file.write(all_identifiers.to_json)
-  end
+#  File.open("#{output_folder}/#{all_ids_name}", 'w') do |file|
+#    file.write(all_identifiers.to_json)
+#  end
 end

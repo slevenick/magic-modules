@@ -56,9 +56,19 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
   end
   plural_identifiers = next_identifiers
 <% end %>
-  all_identifiers = []
+  all_ids_file = File.read("#{output_folder}/{all_ids_name}")
+  all_identifiers = JSON.parse(all_ids_file)
+
   i = 0
   plural_identifiers.each do |plural_identifier|
     plural = <%= resource_name.pluralize -%>(plural_identifier)
     identifiers = plural.identifiers
     
+    identifiers.each do |identifier|
+      describe all_identifiers do
+        it { should include identifier }
+      end
+    end
+  end
+
+end
