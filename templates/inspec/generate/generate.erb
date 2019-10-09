@@ -1,7 +1,7 @@
 require 'yaml'
 require 'logger'
 
-<% resource_name = resource_name(object, product_ns) -%>
+<% resource_name = resource_name(object, product) -%>
 title 'Test GCP <%= resource_name -%> resource.'
 
 
@@ -37,12 +37,12 @@ control '<%= resource_name -%>-1.0' do
         filter = eval "lambda { |resource| #{filter_string} }"
         filters.push(filter)
       end
-      config_ignored = config['ignore']
+      config_ignored = config['ignore_fields']
       ignored_fields += config_ignored
     end
   end
   project_name = ENV["GCP_PROJECT_NAME"]
-  raise "Undefined project name" if project_name.nil?
+  raise "Undefined project name, please set the GCP_PROJECT_NAME variable" if project_name.nil?
   plural_identifiers = [{project: project_name}]
 <% 
 individual_url = format_url(object.self_link_url)

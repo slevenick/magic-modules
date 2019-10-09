@@ -30,15 +30,14 @@ def dump(path)
 end
 
 def identifiers
-  individual_url = '<%= format_url(object.self_link_url[1]) %>'
-  params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
+  params = <%= extract_identifiers(format_url(object.self_link_url)) %>
 
   my_result = []
   i = 0
   @table.each do |item|
     combo = item.merge(@params)
 
-    parse = <%= object.name -%>.new(combo.merge({fake: true}))
+    parse = <%= object.__product.name.camelize(:upper) -%><%= object.name -%>.new(combo.merge({fake: true}))
 
     item_identifiers = {}
     params.each do |param|

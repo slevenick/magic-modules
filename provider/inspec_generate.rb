@@ -32,6 +32,14 @@ module Provider
       data_clone.generate('templates/inspec/generate/generate.erb', out_file, self)
     end
 
+    def copy_common_files(output_folder)
+      Google::LOGGER.info 'Copying common files.'
+      copy_file_list(output_folder, [
+                      ['generated_test_template.erb',
+                       'templates/inspec/generate/generated_test_template.erb']
+                    ])
+    end
+
     # Returns ruby code that can turn the specified property into an array of 
     # InSpec assertions to test the value of that property for a given object
 

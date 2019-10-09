@@ -18,7 +18,7 @@ def dump(path, template_path, i, ignored_fields)
   my_map = {
     name: name,
     arr: arr,
-    type: '<%= resource_name(object, product_ns) -%>',
+    type: '<%= resource_name(object, product) -%>',
     identifiers: @params,
     number: i
   }
