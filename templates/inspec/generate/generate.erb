@@ -3,8 +3,6 @@ require 'logger'
 
 <% resource_name = resource_name(object, product) -%>
 title 'Test GCP <%= resource_name -%> resource.'
-
-
 control '<%= resource_name -%>-1.0' do
   impact 1.0
   title '<%= resource_name -%> resource test'
@@ -13,25 +11,24 @@ control '<%= resource_name -%>-1.0' do
 
   logger = Logger.new(STDOUT)
   logger.level = Logger::WARN
-  logger.warn("Generating tests for <%= resource_name -%>")
+  logger.warn('Generating tests for <%= resource_name -%>')
   filters = []
   ignored_fields = []
-  output_folder = ENV["OUTPUT_PATH"]
-  
+  output_folder = ENV['OUTPUT_PATH']
+
   if output_folder.nil?
-    
     output_folder = File.join(File.dirname(__FILE__), '../../generated_tests')
     logger.warn("Undefined output folder path at variable OUTPUT_PATH. Defaulting to #{File.expand_path(output_folder)}")
   end
 
-  Dir.mkdir(output_folder) unless File.exists?(output_folder)
+  Dir.mkdir(output_folder) unless File.exist?(output_folder)
   template_path = File.join(File.dirname(__FILE__), '../../generated_test_template.erb')
-  config_folder = ENV["CNF_PATH"]
-  logger.warn("Undefined configuration folder path at variable CNF_PATH. Ignoring configuration files")
+  config_folder = ENV['CNF_PATH']
+  logger.warn('Undefined configuration folder path at variable CNF_PATH. Ignoring configuration files')
   unless config_folder.nil?
-    file_name = File.join(config_folder, "<%= resource_name %>.yaml")
+    file_name = File.join(config_folder, '<%= resource_name %>.yaml')
     if File.file?(file_name)
-      config = YAML::load_file(file_name)
+      config = YAML.load_file(file_name)
       config_filters = config['filters']
       config_filters.each do |filter_string|
         filter = eval "lambda { |resource| #{filter_string} }"
@@ -41,19 +38,20 @@ control '<%= resource_name -%>-1.0' do
       ignored_fields += config_ignored
     end
   end
-  project_name = ENV["GCP_PROJECT_NAME"]
-  raise "Undefined project name, please set the GCP_PROJECT_NAME variable" if project_name.nil?
+  project_name = ENV['GCP_PROJECT_NAME']
+  raise 'Undefined project name, please set the GCP_PROJECT_NAME variable' if project_name.nil?
   plural_identifiers = [{project: project_name}]
 <% 
 individual_url = format_url(object.self_link_url)
 params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] } 
-%>
+-%>
+
 <% if params.include?('zone') %>
   next_identifiers = []
   zone_names = google_compute_zones(project: project_name).zone_names
   zone_names.each do |zone_name|
     plural_identifiers.each do |plural_identifier|
-      next_identifiers.push(plural_identifier.merge({zone: zone_name}))
+      next_identifiers.push(plural_identifier.merge({ zone: zone_name }))
     end
   end
   plural_identifiers = next_identifiers
@@ -63,7 +61,7 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
   region_names = google_compute_regions(project: project_name).region_names
   region_names.each do |region_name|
     plural_identifiers.each do |plural_identifier|
-      next_identifiers.push(plural_identifier.merge({region: region_name}))
+      next_identifiers.push(plural_identifier.merge({ region: region_name }))
     end
   end
   plural_identifiers = next_identifiers
@@ -73,7 +71,7 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
   region_names = google_compute_regions(project: project_name).region_names
   region_names.each do |region_name|
     plural_identifiers.each do |plural_identifier|
-      next_identifiers.push(plural_identifier.merge({location: region_name}))
+      next_identifiers.push(plural_identifier.merge({ location: region_name }))
     end
   end
   plural_identifiers = next_identifiers
@@ -83,7 +81,7 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
   managed_zones = google_dns_managed_zones(project: project_name).zone_names
   managed_zones.each do |managed_zone|
     plural_identifiers.each do |plural_identifier|
-      next_identifiers.push(plural_identifier.merge({managed_zone: managed_zone}))
+      next_identifiers.push(plural_identifier.merge({ managed_zone: managed_zone }))
     end
   end
   plural_identifiers = next_identifiers
@@ -103,15 +101,10 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
         
         output = "Writing #{File.expand_path(output_folder)}/<%= object.name -%>_#{i}.rb"
         describe output do
-          it { should match /test/ }
-        end   
+          its('length') { should be >= 0 }
+        end
         i += 1
       end
     end
   end
-
-  all_ids_name = '<%= resource_name -%>_identifiers.json'
-#  File.open("#{output_folder}/#{all_ids_name}", 'w') do |file|
-#    file.write(all_identifiers.to_json)
-#  end
 end

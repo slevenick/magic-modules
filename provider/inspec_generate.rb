@@ -71,9 +71,13 @@ module Provider
       end
 
       if nested
-        return "#{modularized_property_class(property)}.un_parse(x, \"#{path}\")"
+        # Nested code will have a variable `path` that is a string with string interpolation inside it,
+        # IE: path = "#{another_var}.something", so it needs double quotes to evaluate that.
+        "#{modularized_property_class(property)}.un_parse(x, \"#{path}\")"
+      else
+        # Non nested code needs to use single quotes to comply with rubocop.
+        "#{modularized_property_class(property)}.un_parse(x, \'#{path}\')"
       end
-      "#{modularized_property_class(property)}.un_parse(x, \'#{path}\')"
     end
 
     # We don't want to generate anything but the resource.
