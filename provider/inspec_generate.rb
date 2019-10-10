@@ -23,7 +23,7 @@ module Provider
     end
 
     def generate_generation_template(data)
-      target_folder = File.join(data.output_folder, 'generate')
+      target_folder = File.join(data.output_folder, 'gen-controls')
       target_path = File.join(data.output_folder, 'test/integration/verify/controls')
       
       name = data.object.name.underscore
@@ -69,7 +69,11 @@ module Provider
         # TODO(slevenick): This does not test that the array ONLY includes these items
         return "x.map { |single| \"its('#{path}') { should include '\#{single.to_json\}' }\" }"
       end
-      "#{modularized_property_class(property)}.un_parse(x, \"#{path}\")"
+
+      if nested
+        return "#{modularized_property_class(property)}.un_parse(x, \"#{path}\")"
+      end
+      "#{modularized_property_class(property)}.un_parse(x, \'#{path}\')"
     end
 
     # We don't want to generate anything but the resource.

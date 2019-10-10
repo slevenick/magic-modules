@@ -102,7 +102,6 @@ best_guess_identifier = extract_identifiers(individual_url).last
 
 <% if do_generate -%>
 <%= lines(indent(compile('templates/inspec/generate/singular_generate_code.erb'), 2)) -%>
-
 <% end -%>
 <% unless object&.additional_functions.nil? -%>
 

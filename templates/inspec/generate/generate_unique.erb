@@ -12,11 +12,12 @@ control '<%= resource_name -%>-1.0' do
   project_name = ENV["GCP_PROJECT_NAME"]
   raise "Undefined project name" if project_name.nil?
   plural_identifiers = [{project: project_name}]
+
 <% 
 individual_url = format_url(object.self_link_url)
 params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] } 
-%>
-<% if params.include?('zone') %>
+-%>
+<% if params.include?('zone') -%>
   next_identifiers = []
   zone_names = google_compute_zones(project: project_name).zone_names
   zone_names.each do |zone_name|
@@ -25,8 +26,9 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
   plural_identifiers = next_identifiers
+
 <% end %>
-<% if params.include?('region') %>
+<% if params.include?('region') -%>
   next_identifiers = []
   region_names = google_compute_regions(project: project_name).region_names
   region_names.each do |region_name|
@@ -35,8 +37,9 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
   plural_identifiers = next_identifiers
+
 <% end %>
-<% if params.include?('location') %>
+<% if params.include?('location') -%>
   next_identifiers = []
   region_names = google_compute_regions(project: project_name).region_names
   region_names.each do |region_name|
@@ -45,8 +48,9 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
   plural_identifiers = next_identifiers
-<% end %>
-<% if params.include?('managed_zone') %>
+
+<% end -%>
+<% if params.include?('managed_zone') -%>
   next_identifiers = []
   managed_zones = google_dns_managed_zones(project: project_name).zone_names
   managed_zones.each do |managed_zone|
@@ -55,7 +59,8 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
   plural_identifiers = next_identifiers
-<% end %>
+
+<% end -%>
   all_ids_file = File.read("#{output_folder}/{all_ids_name}")
   all_identifiers = JSON.parse(all_ids_file)
 

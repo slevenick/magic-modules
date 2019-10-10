@@ -34,7 +34,7 @@ module GoogleInSpec
     module Property
       class <%= class_name -%>
 
-        attr_reader :args
+        attr_reader :arguments
 <% if property.nested_properties? -%>
 <% property.nested_properties.each do |prop| -%>
 
@@ -42,13 +42,13 @@ module GoogleInSpec
 <% end # property.nested_properties.each -%>
 
 <% end # if property.nested_properties? -%>
-        def initialize(args = nil, parent_identifier = nil)
-          @args = args
-          return if args.nil?
+        def initialize(arguments = nil, parent_identifier = nil)
+          @arguments = arguments
+          return if arguments.nil?
           @parent_identifier = parent_identifier
 <% property.nested_properties.each do |prop| -%>
 <%
-  parse_code = "@#{prop.out_name} = #{parse_code(prop, 'args')}"
+  parse_code = "@#{prop.out_name} = #{parse_code(prop, 'arguments')}"
 -%>
 <%= lines(indent(parse_code, 10)) -%>
 <% end # property.nested_properties.each -%>
@@ -65,7 +65,7 @@ module GoogleInSpec
         end
 <% end # has_time_prop -%>
 
-        def self.un_parse(item, path)
+        def self.un_parse(item, current_path)
           return if item.nil?
           way_to_parse = {
 <% property.nested_properties.each do |prop| -%>
@@ -73,22 +73,17 @@ module GoogleInSpec
 <% end # object.all_user_properties.each -%>
           }
           way_to_parse.map do |k, v|
-            v.call(item.method(k).call, path)
+            v.call(item.method(k).call, current_path)
           end
         end
 
-        def to_json
-          @args.to_json
-        end
-
-        def self.from_json string
-          data = JSON.load string
-          self.new data
+        def to_json(*_args)
+          @arguments.to_json
         end
 
         # other is a string representation of this object
         def ==(other)
-          return @args == JSON.load(other)
+          @arguments == JSON.parse(other)
         end
       end
 <% if property.is_a?(Api::Type::Array) -%>
