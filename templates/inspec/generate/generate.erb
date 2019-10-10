@@ -40,13 +40,11 @@ control '<%= resource_name -%>-1.0' do
   end
   project_name = ENV['GCP_PROJECT_NAME']
   raise 'Undefined project name, please set the GCP_PROJECT_NAME variable' if project_name.nil?
-  plural_identifiers = [{project: project_name}]
-<% 
-individual_url = format_url(object.self_link_url)
-params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] } 
--%>
+  plural_identifiers = [{ project: project_name }]
+<% individual_url = format_url(object.self_link_url) -%>
+<% params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] } -%>
 
-<% if params.include?('zone') %>
+<% if params.include?('zone') -%>
   next_identifiers = []
   zone_names = google_compute_zones(project: project_name).zone_names
   zone_names.each do |zone_name|
@@ -55,8 +53,9 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
   plural_identifiers = next_identifiers
-<% end %>
-<% if params.include?('region') %>
+
+<% end -%>
+<% if params.include?('region') -%>
   next_identifiers = []
   region_names = google_compute_regions(project: project_name).region_names
   region_names.each do |region_name|
@@ -65,8 +64,9 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
   plural_identifiers = next_identifiers
-<% end %>
-<% if params.include?('location') %>
+
+<% end -%>
+<% if params.include?('location') -%>
   next_identifiers = []
   region_names = google_compute_regions(project: project_name).region_names
   region_names.each do |region_name|
@@ -75,8 +75,9 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
   plural_identifiers = next_identifiers
-<% end %>
-<% if params.include?('managed_zone') %>
+
+<% end -%>
+<% if params.include?('managed_zone') -%>
   next_identifiers = []
   managed_zones = google_dns_managed_zones(project: project_name).zone_names
   managed_zones.each do |managed_zone|
@@ -85,20 +86,21 @@ params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
   plural_identifiers = next_identifiers
-<% end %>
+
+<% end -%>
   all_identifiers = []
   i = 0
   plural_identifiers.each do |plural_identifier|
     plural = <%= resource_name.pluralize -%>(plural_identifier)
     identifiers = plural.identifiers
-    
+
     identifiers.each do |identifier|
       all_identifiers.push(identifier)
       resource = <%= resource_name -%>(identifier)
 
       if filters.all? { |filter| filter.call(resource) }
         resource.dump(output_folder, template_path, i, ignored_fields)
-        
+
         output = "Writing #{File.expand_path(output_folder)}/<%= object.name -%>_#{i}.rb"
         describe output do
           its('length') { should be >= 0 }
