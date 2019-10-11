@@ -1,13 +1,14 @@
+# frozen_string_literal: true
+
 require 'yaml'
 require 'logger'
 
 <% resource_name = resource_name(object, product) -%>
 title 'Test GCP <%= resource_name -%> resource.'
+# rubocop:disable Metrics/BlockLength
 control '<%= resource_name -%>-1.0' do
   impact 1.0
   title '<%= resource_name -%> resource test'
-
-  plural_identifiers = []
 
   logger = Logger.new(STDOUT)
   logger.level = Logger::WARN
@@ -30,9 +31,9 @@ control '<%= resource_name -%>-1.0' do
     if File.file?(file_name)
       config = YAML.load_file(file_name)
       config_filters = config['filters']
-      config_filters.each do |filter_string|
-        filter = eval "lambda { |resource| #{filter_string} }"
-        filters.push(filter)
+      config_filters.each do
+        # This is not currently implemented
+        logger.warn('Filters are not currently supported, ignoring')
       end
       config_ignored = config['ignore_fields']
       ignored_fields += config_ignored
@@ -98,15 +99,18 @@ control '<%= resource_name -%>-1.0' do
       all_identifiers.push(identifier)
       resource = <%= resource_name -%>(identifier)
 
-      if filters.all? { |filter| filter.call(resource) }
-        resource.dump(output_folder, template_path, i, ignored_fields)
-
-        output = "Writing #{File.expand_path(output_folder)}/<%= object.name -%>_#{i}.rb"
-        describe output do
-          its('length') { should be >= 0 }
-        end
-        i += 1
+      unless filters.all? { |filter| filter.call(resource) }
+        next
       end
+      resource.dump(output_folder, template_path, i, ignored_fields)
+
+      output = "Writing #{File.expand_path(output_folder)}/<%= object.name -%>_#{i}.rb"
+      describe output do
+        # Prints pretty message when writing controls to files
+        its('length') { should be >= 0 }
+      end
+      i += 1
     end
   end
 end
+# rubocop:enable Metrics/BlockLength
