@@ -197,7 +197,6 @@ func TestAccComputeFirewall_disabled(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeFirewall_enableLogging(t *testing.T) {
 	t.Parallel()
 
@@ -236,7 +235,6 @@ func TestAccComputeFirewall_enableLogging(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccComputeFirewall_basic(network, firewall string) string {
 	return fmt.Sprintf(`
@@ -407,7 +405,6 @@ func testAccComputeFirewall_disabled(network, firewall string) string {
 	}`, network, firewall)
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeFirewall_enableLogging(network, firewall string, enableLogging bool) string {
 	enableLoggingCfg := ""
 	if enableLogging {
@@ -432,4 +429,3 @@ func testAccComputeFirewall_enableLogging(network, firewall string, enableLoggin
 		%s
 	}`, network, firewall, enableLoggingCfg)
 }
-<% end -%>
