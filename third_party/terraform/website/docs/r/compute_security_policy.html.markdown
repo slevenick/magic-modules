@@ -91,7 +91,7 @@ The `match` block supports:
     Available options:
     * SRC_IPS_V1: Must specify the corresponding `src_ip_ranges` field in `config`.
 
-* `expr` - (Optional) User defined CEVAL expression. A CEVAL expression is used to specify match criteria
+* `expr` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) User defined CEVAL expression. A CEVAL expression is used to specify match criteria
     such as origin.ip, source.region_code and contents in the request header.
     Structure is documented below.
 
