@@ -36,11 +36,13 @@ type VersionOrder int
 const (
 	GA = iota
 	BETA
+	PRIVATE
 )
 
 var GA_VERSION = Version{V: "ga", Order: GA}
 var BETA_VERSION = Version{V: "beta", Order: BETA}
+var PRIVATE_VERSION = Version{V: "private", Order: PRIVATE}
 
 func allVersions() []Version {
-	return []Version{GA_VERSION, BETA_VERSION}
+	return []Version{GA_VERSION, BETA_VERSION, PRIVATE_VERSION}
 }
