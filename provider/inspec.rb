@@ -43,7 +43,7 @@ module Provider
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec
     def generate_resource(data)
-      target_folder = File.join(data[:output_folder], 'inspec')
+      target_folder = File.join(data[:output_folder], 'libraries')
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
       generate_resource_file data.clone.merge(
@@ -58,7 +58,7 @@ module Provider
       generate_documentation(data)
     end
 
-     # Generates InSpec markdown documents for the resource
+    # Generates InSpec markdown documents for the resource
     def generate_documentation(data)
       name = data[:object].name.underscore
       docs_folder = File.join(data[:output_folder], 'docs', 'resources')
@@ -74,8 +74,12 @@ module Provider
       url.split("\n").join('')
     end
 
-    # TODO?
-    def generate_resource_tests(data) end
+    # Copies InSpec unit tests to build folder
+    def generate_resource_tests(data)
+      target_folder = File.join(data[:output_folder], 'test/unit')
+      FileUtils.mkpath target_folder
+      FileUtils.cp_r 'templates/inspec/tests/.', target_folder 
+    end
 
     def generate_base_property(data) end
 
@@ -178,7 +182,7 @@ module Provider
       "google_#{product_ns.downcase}_#{object.name.underscore}"
     end
 
-     def sub_property_descriptions(property)
+    def sub_property_descriptions(property)
       if nested_object?(property)
         return property.properties.map \
           { |prop| "    * `#{prop.name}`: #{prop.description}" }.join("\n")
@@ -188,7 +192,8 @@ module Provider
         return property.item_type.properties.map \
           { |prop| "    * `#{prop.name}`: #{prop.description}" }.join("\n")
       end
+      # rubocop:enable Style/GuardClause
     end
-    # rubocop:enable Style/GuardClause
   end
+  # rubocop:enable Metrics/ClassLength
 end
