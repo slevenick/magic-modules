@@ -1,0 +1,10 @@
+resource "google_folder" "folder" {
+  display_name = "{{folder}}"
+  parent       = "organizations/{{organization}}"
+}
+
+resource "google_compute_firewall_policy" "primary" {
+	parent      = google_folder.folder.name
+  short_name  = "{{name}}"
+  description = "Updated description"
+}

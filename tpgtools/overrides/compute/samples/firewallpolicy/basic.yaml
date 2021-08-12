@@ -1,0 +1,3 @@
+updates:
+  - resource: basic_update_description.tf.tmpl
+  - resource: basic_update_description_2.tf.tmpl

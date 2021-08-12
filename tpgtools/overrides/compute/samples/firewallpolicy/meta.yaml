@@ -1,0 +1,14 @@
+# meta.yaml
+#
+#
+substitutions:
+  - substitution: "project"
+    value: ":PROJECT"
+  - substitution: "region"
+    value: ":REGION"
+  - substitution: "organization"
+    value: ":ORG_ID"
+  - substitution: "name"
+    value: "policy"
+  - substitution: "folder"
+    value: "folder"
