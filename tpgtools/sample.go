@@ -103,9 +103,9 @@ func BuildDependency(fileName, product, localname, version string, b []byte) (*D
 	fileParts := strings.Split(fileName, ".")
 	if len(fileParts) == 4 {
 		product = strings.Title(fileParts[1])
-		resourceName = strings.Title(fileParts[2])
+		resourceName = snakeToTitleCase(fileParts[2])
 	} else if len(fileParts) == 3 {
-		resourceName = strings.Title(fileParts[1])
+		resourceName = snakeToTitleCase(fileParts[1])
 	} else {
 		return nil, fmt.Errorf("Invalid sample dependency file name: %s", fileName)
 	}
@@ -243,7 +243,8 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	out := []Sample{*s}
 	for i, update := range s.Updates {
 		newSample := *s
-		*newSample.PrimaryResource = update["resource"]
+		primaryResource := update["resource"]
+		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
 			newSample.DependencyList[0] = newSample.generateSampleDependencyWithName(*newSample.PrimaryResource, "primary")
 		}

@@ -1,3 +1,18 @@
+// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: DCL     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This file is managed by Magic Modules (https://github.com/GoogleCloudPlatform/magic-modules)
+//     and is based on the DCL (https://github.com/GoogleCloudPlatform/declarative-resource-client-library).
+//     Changes will need to be made to the DCL or Magic Modules instead of here.
+//
+//     We are not currently able to accept contributions to this file. If changes
+//     are required, please file an issue at https://github.com/hashicorp/terraform-provider-google/issues/new/choose
+//
+// ----------------------------------------------------------------------------
+
 package main
 
 import (
@@ -9,12 +24,13 @@ import (
 	assuredworkloads "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads"
 	assuredworkloadsBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads/beta"
 	cloudbuildBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuild/beta"
+	compute "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute"
+	computeBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute/beta"
 	dataproc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc"
 	dataprocBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/dataproc/beta"
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc"
 	eventarcBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
 	gkehubBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/gkehub/beta"
-	run "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/run"
 	fmtcmd "github.com/hashicorp/hcl/hcl/fmtcmd"
 )
 
@@ -27,6 +43,12 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 			return "google_assured_workloads_workload", nil
 		case "CloudbuildWorkerPool":
 			return "google_cloudbuild_worker_pool", nil
+		case "ComputeFirewallPolicy":
+			return "google_compute_firewall_policy", nil
+		case "ComputeFirewallPolicyAssociation":
+			return "google_compute_firewall_policy_association", nil
+		case "ComputeFirewallPolicyRule":
+			return "google_compute_firewall_policy_rule", nil
 		case "DataprocWorkflowTemplate":
 			return "google_dataproc_workflow_template", nil
 		case "EventarcTrigger":
@@ -41,12 +63,16 @@ func DCLToTerraformReference(resourceType, version string) (string, error) {
 	switch resourceType {
 	case "AssuredWorkloadsWorkload":
 		return "google_assured_workloads_workload", nil
+	case "ComputeFirewallPolicy":
+		return "google_compute_firewall_policy", nil
+	case "ComputeFirewallPolicyAssociation":
+		return "google_compute_firewall_policy_association", nil
+	case "ComputeFirewallPolicyRule":
+		return "google_compute_firewall_policy_rule", nil
 	case "DataprocWorkflowTemplate":
 		return "google_dataproc_workflow_template", nil
 	case "EventarcTrigger":
 		return "google_eventarc_trigger", nil
-	case "RunService":
-		return "google_cloud_run_service", nil
 	default:
 		return "", fmt.Errorf("Error retrieving Terraform name from DCL resource type: %s not found", resourceType)
 	}
@@ -69,6 +95,24 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 				return "", err
 			}
 			return CloudbuildWorkerPoolBetaAsHCL(*r)
+		case "ComputeFirewallPolicy":
+			r := &computeBeta.FirewallPolicy{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeFirewallPolicyBetaAsHCL(*r)
+		case "ComputeFirewallPolicyAssociation":
+			r := &computeBeta.FirewallPolicyAssociation{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeFirewallPolicyAssociationBetaAsHCL(*r)
+		case "ComputeFirewallPolicyRule":
+			r := &computeBeta.FirewallPolicyRule{}
+			if err := json.Unmarshal(b, r); err != nil {
+				return "", err
+			}
+			return ComputeFirewallPolicyRuleBetaAsHCL(*r)
 		case "DataprocWorkflowTemplate":
 			r := &dataprocBeta.WorkflowTemplate{}
 			if err := json.Unmarshal(b, r); err != nil {
@@ -103,6 +147,24 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 			return "", err
 		}
 		return AssuredWorkloadsWorkloadAsHCL(*r)
+	case "ComputeFirewallPolicy":
+		r := &compute.FirewallPolicy{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyAsHCL(*r)
+	case "ComputeFirewallPolicyAssociation":
+		r := &compute.FirewallPolicyAssociation{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyAssociationAsHCL(*r)
+	case "ComputeFirewallPolicyRule":
+		r := &compute.FirewallPolicyRule{}
+		if err := json.Unmarshal(b, r); err != nil {
+			return "", err
+		}
+		return ComputeFirewallPolicyRuleAsHCL(*r)
 	case "DataprocWorkflowTemplate":
 		r := &dataproc.WorkflowTemplate{}
 		if err := json.Unmarshal(b, r); err != nil {
@@ -115,12 +177,6 @@ func ConvertSampleJSONToHCL(resourceType string, version string, b []byte) (stri
 			return "", err
 		}
 		return EventarcTriggerAsHCL(*r)
-	case "RunService":
-		r := &run.Service{}
-		if err := json.Unmarshal(b, r); err != nil {
-			return "", err
-		}
-		return RunServiceAsHCL(*r)
 	default:
 		//return fmt.Sprintf("%s resource not supported in tpgtools", resourceType), nil
 		return "", fmt.Errorf("Error converting sample JSON to HCL: %s not found", resourceType)
@@ -251,6 +307,140 @@ func convertCloudbuildWorkerPoolBetaWorkerConfigToHCL(r *cloudbuildBeta.WorkerPo
 	}
 	if r.NoExternalIP != nil {
 		outputConfig += fmt.Sprintf("\tno_external_ip = %#v\n", *r.NoExternalIP)
+	}
+	return outputConfig + "}"
+}
+
+// ComputeFirewallPolicyBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyBetaAsHCL(r computeBeta.FirewallPolicy) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy\" \"output\" {\n"
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if r.ShortName != nil {
+		outputConfig += fmt.Sprintf("\tshort_name = %#v\n", *r.ShortName)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// ComputeFirewallPolicyAssociationBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyAssociationBetaAsHCL(r computeBeta.FirewallPolicyAssociation) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_association\" \"output\" {\n"
+	if r.AttachmentTarget != nil {
+		outputConfig += fmt.Sprintf("\tattachment_target = %#v\n", *r.AttachmentTarget)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// ComputeFirewallPolicyRuleBetaAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyRuleBetaAsHCL(r computeBeta.FirewallPolicyRule) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_rule\" \"output\" {\n"
+	if r.Action != nil {
+		outputConfig += fmt.Sprintf("\taction = %#v\n", *r.Action)
+	}
+	if r.Direction != nil {
+		outputConfig += fmt.Sprintf("\tdirection = %#v\n", *r.Direction)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if v := convertComputeFirewallPolicyRuleBetaMatchToHCL(r.Match); v != "" {
+		outputConfig += fmt.Sprintf("\tmatch %s\n", v)
+	}
+	if r.Priority != nil {
+		outputConfig += fmt.Sprintf("\tpriority = %#v\n", *r.Priority)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Disabled != nil {
+		outputConfig += fmt.Sprintf("\tdisabled = %#v\n", *r.Disabled)
+	}
+	if r.EnableLogging != nil {
+		outputConfig += fmt.Sprintf("\tenable_logging = %#v\n", *r.EnableLogging)
+	}
+	if r.TargetResources != nil {
+		outputConfig += "\ttarget_resources = ["
+		for _, v := range r.TargetResources {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.TargetServiceAccounts != nil {
+		outputConfig += "\ttarget_service_accounts = ["
+		for _, v := range r.TargetServiceAccounts {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchToHCL(r *computeBeta.FirewallPolicyRuleMatch) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Layer4Configs != nil {
+		for _, v := range r.Layer4Configs {
+			outputConfig += fmt.Sprintf("\tlayer4_configs %s\n", convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsToHCL(&v))
+		}
+	}
+	if r.DestIPRanges != nil {
+		outputConfig += "\tdest_ip_ranges = ["
+		for _, v := range r.DestIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.SrcIPRanges != nil {
+		outputConfig += "\tsrc_ip_ranges = ["
+		for _, v := range r.SrcIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsToHCL(r *computeBeta.FirewallPolicyRuleMatchLayer4Configs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.Ports != nil {
+		outputConfig += "\tports = ["
+		for _, v := range r.Ports {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
 	}
 	return outputConfig + "}"
 }
@@ -1599,6 +1789,140 @@ func convertAssuredWorkloadsWorkloadResourcesToHCL(r *assuredworkloads.WorkloadR
 	return outputConfig + "}"
 }
 
+// ComputeFirewallPolicyAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyAsHCL(r compute.FirewallPolicy) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy\" \"output\" {\n"
+	if r.Parent != nil {
+		outputConfig += fmt.Sprintf("\tparent = %#v\n", *r.Parent)
+	}
+	if r.ShortName != nil {
+		outputConfig += fmt.Sprintf("\tshort_name = %#v\n", *r.ShortName)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// ComputeFirewallPolicyAssociationAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyAssociationAsHCL(r compute.FirewallPolicyAssociation) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_association\" \"output\" {\n"
+	if r.AttachmentTarget != nil {
+		outputConfig += fmt.Sprintf("\tattachment_target = %#v\n", *r.AttachmentTarget)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if r.Name != nil {
+		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+// ComputeFirewallPolicyRuleAsHCL returns a string representation of the specified resource in HCL.
+// The generated HCL will include every settable field as a literal - that is, no
+// variables, no references.  This may not be the best possible representation, but
+// the crucial point is that `terraform import; terraform apply` will not produce
+// any changes.  We do not validate that the resource specified will pass terraform
+// validation unless is an object returned from the API after an Apply.
+func ComputeFirewallPolicyRuleAsHCL(r compute.FirewallPolicyRule) (string, error) {
+	outputConfig := "resource \"google_compute_firewall_policy_rule\" \"output\" {\n"
+	if r.Action != nil {
+		outputConfig += fmt.Sprintf("\taction = %#v\n", *r.Action)
+	}
+	if r.Direction != nil {
+		outputConfig += fmt.Sprintf("\tdirection = %#v\n", *r.Direction)
+	}
+	if r.FirewallPolicy != nil {
+		outputConfig += fmt.Sprintf("\tfirewall_policy = %#v\n", *r.FirewallPolicy)
+	}
+	if v := convertComputeFirewallPolicyRuleMatchToHCL(r.Match); v != "" {
+		outputConfig += fmt.Sprintf("\tmatch %s\n", v)
+	}
+	if r.Priority != nil {
+		outputConfig += fmt.Sprintf("\tpriority = %#v\n", *r.Priority)
+	}
+	if r.Description != nil {
+		outputConfig += fmt.Sprintf("\tdescription = %#v\n", *r.Description)
+	}
+	if r.Disabled != nil {
+		outputConfig += fmt.Sprintf("\tdisabled = %#v\n", *r.Disabled)
+	}
+	if r.EnableLogging != nil {
+		outputConfig += fmt.Sprintf("\tenable_logging = %#v\n", *r.EnableLogging)
+	}
+	if r.TargetResources != nil {
+		outputConfig += "\ttarget_resources = ["
+		for _, v := range r.TargetResources {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.TargetServiceAccounts != nil {
+		outputConfig += "\ttarget_service_accounts = ["
+		for _, v := range r.TargetServiceAccounts {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return formatHCL(outputConfig + "}")
+}
+
+func convertComputeFirewallPolicyRuleMatchToHCL(r *compute.FirewallPolicyRuleMatch) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.Layer4Configs != nil {
+		for _, v := range r.Layer4Configs {
+			outputConfig += fmt.Sprintf("\tlayer4_configs %s\n", convertComputeFirewallPolicyRuleMatchLayer4ConfigsToHCL(&v))
+		}
+	}
+	if r.DestIPRanges != nil {
+		outputConfig += "\tdest_ip_ranges = ["
+		for _, v := range r.DestIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	if r.SrcIPRanges != nil {
+		outputConfig += "\tsrc_ip_ranges = ["
+		for _, v := range r.SrcIPRanges {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
+func convertComputeFirewallPolicyRuleMatchLayer4ConfigsToHCL(r *compute.FirewallPolicyRuleMatchLayer4Configs) string {
+	if r == nil {
+		return ""
+	}
+	outputConfig := "{\n"
+	if r.IPProtocol != nil {
+		outputConfig += fmt.Sprintf("\tip_protocol = %#v\n", *r.IPProtocol)
+	}
+	if r.Ports != nil {
+		outputConfig += "\tports = ["
+		for _, v := range r.Ports {
+			outputConfig += fmt.Sprintf("%#v, ", v)
+		}
+		outputConfig += "]\n"
+	}
+	return outputConfig + "}"
+}
+
 // DataprocWorkflowTemplateAsHCL returns a string representation of the specified resource in HCL.
 // The generated HCL will include every settable field as a literal - that is, no
 // variables, no references.  This may not be the best possible representation, but
@@ -2633,878 +2957,6 @@ func convertEventarcTriggerTransportPubsubToHCL(r *eventarc.TriggerTransportPubs
 	return outputConfig + "}"
 }
 
-// RunServiceAsHCL returns a string representation of the specified resource in HCL.
-// The generated HCL will include every settable field as a literal - that is, no
-// variables, no references.  This may not be the best possible representation, but
-// the crucial point is that `terraform import; terraform apply` will not produce
-// any changes.  We do not validate that the resource specified will pass terraform
-// validation unless is an object returned from the API after an Apply.
-func RunServiceAsHCL(r run.Service) (string, error) {
-	outputConfig := "resource \"google_cloud_run_service\" \"output\" {\n"
-	if r.Location != nil {
-		outputConfig += fmt.Sprintf("\tlocation = %#v\n", *r.Location)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.ApiVersion != nil {
-		outputConfig += fmt.Sprintf("\tapi_version = %#v\n", *r.ApiVersion)
-	}
-	if r.Kind != nil {
-		outputConfig += fmt.Sprintf("\tkind = %#v\n", *r.Kind)
-	}
-	if v := convertRunServiceMetadataToHCL(r.Metadata); v != "" {
-		outputConfig += fmt.Sprintf("\tmetadata %s\n", v)
-	}
-	if r.Project != nil {
-		outputConfig += fmt.Sprintf("\tproject = %#v\n", *r.Project)
-	}
-	if v := convertRunServiceSpecToHCL(r.Spec); v != "" {
-		outputConfig += v
-	}
-	return formatHCL(outputConfig + "}")
-}
-
-func convertRunServiceMetadataToHCL(r *run.ServiceMetadata) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ClusterName != nil {
-		outputConfig += fmt.Sprintf("\tcluster_name = %#v\n", *r.ClusterName)
-	}
-	if r.Finalizers != nil {
-		outputConfig += "\tfinalizers = ["
-		for _, v := range r.Finalizers {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	if r.GenerateName != nil {
-		outputConfig += fmt.Sprintf("\tgenerate_name = %#v\n", *r.GenerateName)
-	}
-	if r.Namespace != nil {
-		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
-	}
-	if r.OwnerReferences != nil {
-		for _, v := range r.OwnerReferences {
-			outputConfig += fmt.Sprintf("\towner_references %s\n", convertRunServiceMetadataOwnerReferencesToHCL(&v))
-		}
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceMetadataOwnerReferencesToHCL(r *run.ServiceMetadataOwnerReferences) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ApiVersion != nil {
-		outputConfig += fmt.Sprintf("\tapi_version = %#v\n", *r.ApiVersion)
-	}
-	if r.BlockOwnerDeletion != nil {
-		outputConfig += fmt.Sprintf("\tblock_owner_deletion = %#v\n", *r.BlockOwnerDeletion)
-	}
-	if r.Controller != nil {
-		outputConfig += fmt.Sprintf("\tcontroller = %#v\n", *r.Controller)
-	}
-	if r.Kind != nil {
-		outputConfig += fmt.Sprintf("\tkind = %#v\n", *r.Kind)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Uid != nil {
-		outputConfig += fmt.Sprintf("\tuid = %#v\n", *r.Uid)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceMetadataCreateTimeToHCL(r *run.ServiceMetadataCreateTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceMetadataDeleteTimeToHCL(r *run.ServiceMetadataDeleteTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecToHCL(r *run.ServiceSpec) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := ""
-	if v := convertRunServiceSpecTemplateToHCL(r.Template); v != "" {
-		outputConfig += fmt.Sprintf("template %s\n", v)
-	}
-	if r.Traffic != nil {
-		for _, v := range r.Traffic {
-			outputConfig += fmt.Sprintf("traffic %s\n", convertRunServiceSpecTrafficToHCL(&v))
-		}
-	}
-	return outputConfig
-}
-
-func convertRunServiceSpecTemplateToHCL(r *run.ServiceSpecTemplate) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateMetadataToHCL(r.Metadata); v != "" {
-		outputConfig += fmt.Sprintf("\tmetadata %s\n", v)
-	}
-	if v := convertRunServiceSpecTemplateSpecToHCL(r.Spec); v != "" {
-		outputConfig += fmt.Sprintf("\tspec %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateMetadataToHCL(r *run.ServiceSpecTemplateMetadata) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ClusterName != nil {
-		outputConfig += fmt.Sprintf("\tcluster_name = %#v\n", *r.ClusterName)
-	}
-	if r.Finalizers != nil {
-		outputConfig += "\tfinalizers = ["
-		for _, v := range r.Finalizers {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	if r.GenerateName != nil {
-		outputConfig += fmt.Sprintf("\tgenerate_name = %#v\n", *r.GenerateName)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Namespace != nil {
-		outputConfig += fmt.Sprintf("\tnamespace = %#v\n", *r.Namespace)
-	}
-	if r.OwnerReferences != nil {
-		for _, v := range r.OwnerReferences {
-			outputConfig += fmt.Sprintf("\towner_references %s\n", convertRunServiceSpecTemplateMetadataOwnerReferencesToHCL(&v))
-		}
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateMetadataOwnerReferencesToHCL(r *run.ServiceSpecTemplateMetadataOwnerReferences) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ApiVersion != nil {
-		outputConfig += fmt.Sprintf("\tapi_version = %#v\n", *r.ApiVersion)
-	}
-	if r.BlockOwnerDeletion != nil {
-		outputConfig += fmt.Sprintf("\tblock_owner_deletion = %#v\n", *r.BlockOwnerDeletion)
-	}
-	if r.Controller != nil {
-		outputConfig += fmt.Sprintf("\tcontroller = %#v\n", *r.Controller)
-	}
-	if r.Kind != nil {
-		outputConfig += fmt.Sprintf("\tkind = %#v\n", *r.Kind)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Uid != nil {
-		outputConfig += fmt.Sprintf("\tuid = %#v\n", *r.Uid)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateMetadataCreateTimeToHCL(r *run.ServiceSpecTemplateMetadataCreateTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateMetadataDeleteTimeToHCL(r *run.ServiceSpecTemplateMetadataDeleteTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecToHCL(r *run.ServiceSpecTemplateSpec) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ContainerConcurrency != nil {
-		outputConfig += fmt.Sprintf("\tcontainer_concurrency = %#v\n", *r.ContainerConcurrency)
-	}
-	if r.Containers != nil {
-		for _, v := range r.Containers {
-			outputConfig += fmt.Sprintf("\tcontainers %s\n", convertRunServiceSpecTemplateSpecContainersToHCL(&v))
-		}
-	}
-	if r.ServiceAccountName != nil {
-		outputConfig += fmt.Sprintf("\tservice_account_name = %#v\n", *r.ServiceAccountName)
-	}
-	if r.TimeoutSeconds != nil {
-		outputConfig += fmt.Sprintf("\ttimeout_seconds = %#v\n", *r.TimeoutSeconds)
-	}
-	if r.Volumes != nil {
-		for _, v := range r.Volumes {
-			outputConfig += fmt.Sprintf("\tvolumes %s\n", convertRunServiceSpecTemplateSpecVolumesToHCL(&v))
-		}
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersToHCL(r *run.ServiceSpecTemplateSpecContainers) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Args != nil {
-		outputConfig += "\targs = ["
-		for _, v := range r.Args {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	if r.Command != nil {
-		outputConfig += "\tcommand = ["
-		for _, v := range r.Command {
-			outputConfig += fmt.Sprintf("%#v, ", v)
-		}
-		outputConfig += "]\n"
-	}
-	if r.Env != nil {
-		for _, v := range r.Env {
-			outputConfig += fmt.Sprintf("\tenv %s\n", convertRunServiceSpecTemplateSpecContainersEnvToHCL(&v))
-		}
-	}
-	if r.EnvFrom != nil {
-		for _, v := range r.EnvFrom {
-			outputConfig += fmt.Sprintf("\tenv_from %s\n", convertRunServiceSpecTemplateSpecContainersEnvFromToHCL(&v))
-		}
-	}
-	if r.Image != nil {
-		outputConfig += fmt.Sprintf("\timage = %#v\n", *r.Image)
-	}
-	if r.ImagePullPolicy != nil {
-		outputConfig += fmt.Sprintf("\timage_pull_policy = %#v\n", *r.ImagePullPolicy)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersLivenessProbeToHCL(r.LivenessProbe); v != "" {
-		outputConfig += fmt.Sprintf("\tliveness_probe %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Ports != nil {
-		for _, v := range r.Ports {
-			outputConfig += fmt.Sprintf("\tports %s\n", convertRunServiceSpecTemplateSpecContainersPortsToHCL(&v))
-		}
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersReadinessProbeToHCL(r.ReadinessProbe); v != "" {
-		outputConfig += fmt.Sprintf("\treadiness_probe %s\n", v)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersResourcesToHCL(r.Resources); v != "" {
-		outputConfig += fmt.Sprintf("\tresources %s\n", v)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersSecurityContextToHCL(r.SecurityContext); v != "" {
-		outputConfig += fmt.Sprintf("\tsecurity_context %s\n", v)
-	}
-	if r.TerminationMessagePath != nil {
-		outputConfig += fmt.Sprintf("\ttermination_message_path = %#v\n", *r.TerminationMessagePath)
-	}
-	if r.TerminationMessagePolicy != nil {
-		outputConfig += fmt.Sprintf("\ttermination_message_policy = %#v\n", *r.TerminationMessagePolicy)
-	}
-	if r.VolumeMounts != nil {
-		for _, v := range r.VolumeMounts {
-			outputConfig += fmt.Sprintf("\tvolume_mounts %s\n", convertRunServiceSpecTemplateSpecContainersVolumeMountsToHCL(&v))
-		}
-	}
-	if r.WorkingDir != nil {
-		outputConfig += fmt.Sprintf("\tworking_dir = %#v\n", *r.WorkingDir)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvToHCL(r *run.ServiceSpecTemplateSpecContainersEnv) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Value != nil {
-		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersEnvValueFromToHCL(r.ValueFrom); v != "" {
-		outputConfig += fmt.Sprintf("\tvalue_from %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromToHCL(r *run.ServiceSpecTemplateSpecContainersEnvValueFrom) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefToHCL(r.ConfigMapKeyRef); v != "" {
-		outputConfig += fmt.Sprintf("\tconfig_map_key_ref %s\n", v)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefToHCL(r.SecretKeyRef); v != "" {
-		outputConfig += fmt.Sprintf("\tsecret_key_ref %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefToHCL(r *run.ServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRef) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Key != nil {
-		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReferenceToHCL(r.LocalObjectReference); v != "" {
-		outputConfig += fmt.Sprintf("\tlocal_object_reference %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReferenceToHCL(r *run.ServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReference) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefToHCL(r *run.ServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRef) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Key != nil {
-		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReferenceToHCL(r.LocalObjectReference); v != "" {
-		outputConfig += fmt.Sprintf("\tlocal_object_reference %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReferenceToHCL(r *run.ServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReference) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromToHCL(r *run.ServiceSpecTemplateSpecContainersEnvFrom) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefToHCL(r.ConfigMapRef); v != "" {
-		outputConfig += fmt.Sprintf("\tconfig_map_ref %s\n", v)
-	}
-	if r.Prefix != nil {
-		outputConfig += fmt.Sprintf("\tprefix = %#v\n", *r.Prefix)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefToHCL(r.SecretRef); v != "" {
-		outputConfig += fmt.Sprintf("\tsecret_ref %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefToHCL(r *run.ServiceSpecTemplateSpecContainersEnvFromConfigMapRef) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReferenceToHCL(r.LocalObjectReference); v != "" {
-		outputConfig += fmt.Sprintf("\tlocal_object_reference %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReferenceToHCL(r *run.ServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReference) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefToHCL(r *run.ServiceSpecTemplateSpecContainersEnvFromSecretRef) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReferenceToHCL(r.LocalObjectReference); v != "" {
-		outputConfig += fmt.Sprintf("\tlocal_object_reference %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReferenceToHCL(r *run.ServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReference) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeToHCL(r *run.ServiceSpecTemplateSpecContainersLivenessProbe) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersLivenessProbeExecToHCL(r.Exec); v != "" {
-		outputConfig += fmt.Sprintf("\texec %s\n", v)
-	}
-	if r.FailureThreshold != nil {
-		outputConfig += fmt.Sprintf("\tfailure_threshold = %#v\n", *r.FailureThreshold)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetToHCL(r.HttpGet); v != "" {
-		outputConfig += fmt.Sprintf("\thttp_get %s\n", v)
-	}
-	if r.InitialDelaySeconds != nil {
-		outputConfig += fmt.Sprintf("\tinitial_delay_seconds = %#v\n", *r.InitialDelaySeconds)
-	}
-	if r.PeriodSeconds != nil {
-		outputConfig += fmt.Sprintf("\tperiod_seconds = %#v\n", *r.PeriodSeconds)
-	}
-	if r.SuccessThreshold != nil {
-		outputConfig += fmt.Sprintf("\tsuccess_threshold = %#v\n", *r.SuccessThreshold)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocketToHCL(r.TcpSocket); v != "" {
-		outputConfig += fmt.Sprintf("\ttcp_socket %s\n", v)
-	}
-	if r.TimeoutSeconds != nil {
-		outputConfig += fmt.Sprintf("\ttimeout_seconds = %#v\n", *r.TimeoutSeconds)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeExecToHCL(r *run.ServiceSpecTemplateSpecContainersLivenessProbeExec) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Command != nil {
-		outputConfig += fmt.Sprintf("\tcommand = %#v\n", *r.Command)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetToHCL(r *run.ServiceSpecTemplateSpecContainersLivenessProbeHttpGet) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Host != nil {
-		outputConfig += fmt.Sprintf("\thost = %#v\n", *r.Host)
-	}
-	if r.HttpHeaders != nil {
-		for _, v := range r.HttpHeaders {
-			outputConfig += fmt.Sprintf("\thttp_headers %s\n", convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeadersToHCL(&v))
-		}
-	}
-	if r.Path != nil {
-		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
-	}
-	if r.Scheme != nil {
-		outputConfig += fmt.Sprintf("\tscheme = %#v\n", *r.Scheme)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeadersToHCL(r *run.ServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeaders) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Value != nil {
-		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocketToHCL(r *run.ServiceSpecTemplateSpecContainersLivenessProbeTcpSocket) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Host != nil {
-		outputConfig += fmt.Sprintf("\thost = %#v\n", *r.Host)
-	}
-	if r.Port != nil {
-		outputConfig += fmt.Sprintf("\tport = %#v\n", *r.Port)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersPortsToHCL(r *run.ServiceSpecTemplateSpecContainersPorts) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ContainerPort != nil {
-		outputConfig += fmt.Sprintf("\tcontainer_port = %#v\n", *r.ContainerPort)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Protocol != nil {
-		outputConfig += fmt.Sprintf("\tprotocol = %#v\n", *r.Protocol)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeToHCL(r *run.ServiceSpecTemplateSpecContainersReadinessProbe) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecContainersReadinessProbeExecToHCL(r.Exec); v != "" {
-		outputConfig += fmt.Sprintf("\texec %s\n", v)
-	}
-	if r.FailureThreshold != nil {
-		outputConfig += fmt.Sprintf("\tfailure_threshold = %#v\n", *r.FailureThreshold)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetToHCL(r.HttpGet); v != "" {
-		outputConfig += fmt.Sprintf("\thttp_get %s\n", v)
-	}
-	if r.InitialDelaySeconds != nil {
-		outputConfig += fmt.Sprintf("\tinitial_delay_seconds = %#v\n", *r.InitialDelaySeconds)
-	}
-	if r.PeriodSeconds != nil {
-		outputConfig += fmt.Sprintf("\tperiod_seconds = %#v\n", *r.PeriodSeconds)
-	}
-	if r.SuccessThreshold != nil {
-		outputConfig += fmt.Sprintf("\tsuccess_threshold = %#v\n", *r.SuccessThreshold)
-	}
-	if v := convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocketToHCL(r.TcpSocket); v != "" {
-		outputConfig += fmt.Sprintf("\ttcp_socket %s\n", v)
-	}
-	if r.TimeoutSeconds != nil {
-		outputConfig += fmt.Sprintf("\ttimeout_seconds = %#v\n", *r.TimeoutSeconds)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeExecToHCL(r *run.ServiceSpecTemplateSpecContainersReadinessProbeExec) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Command != nil {
-		outputConfig += fmt.Sprintf("\tcommand = %#v\n", *r.Command)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetToHCL(r *run.ServiceSpecTemplateSpecContainersReadinessProbeHttpGet) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Host != nil {
-		outputConfig += fmt.Sprintf("\thost = %#v\n", *r.Host)
-	}
-	if r.HttpHeaders != nil {
-		for _, v := range r.HttpHeaders {
-			outputConfig += fmt.Sprintf("\thttp_headers %s\n", convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeadersToHCL(&v))
-		}
-	}
-	if r.Path != nil {
-		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
-	}
-	if r.Scheme != nil {
-		outputConfig += fmt.Sprintf("\tscheme = %#v\n", *r.Scheme)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeadersToHCL(r *run.ServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeaders) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Value != nil {
-		outputConfig += fmt.Sprintf("\tvalue = %#v\n", *r.Value)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocketToHCL(r *run.ServiceSpecTemplateSpecContainersReadinessProbeTcpSocket) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Host != nil {
-		outputConfig += fmt.Sprintf("\thost = %#v\n", *r.Host)
-	}
-	if r.Port != nil {
-		outputConfig += fmt.Sprintf("\tport = %#v\n", *r.Port)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersResourcesToHCL(r *run.ServiceSpecTemplateSpecContainersResources) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersSecurityContextToHCL(r *run.ServiceSpecTemplateSpecContainersSecurityContext) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.RunAsUser != nil {
-		outputConfig += fmt.Sprintf("\trun_as_user = %#v\n", *r.RunAsUser)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecContainersVolumeMountsToHCL(r *run.ServiceSpecTemplateSpecContainersVolumeMounts) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.MountPath != nil {
-		outputConfig += fmt.Sprintf("\tmount_path = %#v\n", *r.MountPath)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.ReadOnly != nil {
-		outputConfig += fmt.Sprintf("\tread_only = %#v\n", *r.ReadOnly)
-	}
-	if r.SubPath != nil {
-		outputConfig += fmt.Sprintf("\tsub_path = %#v\n", *r.SubPath)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecVolumesToHCL(r *run.ServiceSpecTemplateSpecVolumes) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if v := convertRunServiceSpecTemplateSpecVolumesConfigMapToHCL(r.ConfigMap); v != "" {
-		outputConfig += fmt.Sprintf("\tconfig_map %s\n", v)
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if v := convertRunServiceSpecTemplateSpecVolumesSecretToHCL(r.Secret); v != "" {
-		outputConfig += fmt.Sprintf("\tsecret %s\n", v)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecVolumesConfigMapToHCL(r *run.ServiceSpecTemplateSpecVolumesConfigMap) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.DefaultMode != nil {
-		outputConfig += fmt.Sprintf("\tdefault_mode = %#v\n", *r.DefaultMode)
-	}
-	if r.Items != nil {
-		for _, v := range r.Items {
-			outputConfig += fmt.Sprintf("\titems %s\n", convertRunServiceSpecTemplateSpecVolumesConfigMapItemsToHCL(&v))
-		}
-	}
-	if r.Name != nil {
-		outputConfig += fmt.Sprintf("\tname = %#v\n", *r.Name)
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecVolumesConfigMapItemsToHCL(r *run.ServiceSpecTemplateSpecVolumesConfigMapItems) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Key != nil {
-		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
-	}
-	if r.Mode != nil {
-		outputConfig += fmt.Sprintf("\tmode = %#v\n", *r.Mode)
-	}
-	if r.Path != nil {
-		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecVolumesSecretToHCL(r *run.ServiceSpecTemplateSpecVolumesSecret) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.DefaultMode != nil {
-		outputConfig += fmt.Sprintf("\tdefault_mode = %#v\n", *r.DefaultMode)
-	}
-	if r.Items != nil {
-		for _, v := range r.Items {
-			outputConfig += fmt.Sprintf("\titems %s\n", convertRunServiceSpecTemplateSpecVolumesSecretItemsToHCL(&v))
-		}
-	}
-	if r.Optional != nil {
-		outputConfig += fmt.Sprintf("\toptional = %#v\n", *r.Optional)
-	}
-	if r.SecretName != nil {
-		outputConfig += fmt.Sprintf("\tsecret_name = %#v\n", *r.SecretName)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTemplateSpecVolumesSecretItemsToHCL(r *run.ServiceSpecTemplateSpecVolumesSecretItems) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.Key != nil {
-		outputConfig += fmt.Sprintf("\tkey = %#v\n", *r.Key)
-	}
-	if r.Mode != nil {
-		outputConfig += fmt.Sprintf("\tmode = %#v\n", *r.Mode)
-	}
-	if r.Path != nil {
-		outputConfig += fmt.Sprintf("\tpath = %#v\n", *r.Path)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceSpecTrafficToHCL(r *run.ServiceSpecTraffic) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	if r.ConfigurationName != nil {
-		outputConfig += fmt.Sprintf("\tconfiguration_name = %#v\n", *r.ConfigurationName)
-	}
-	if r.LatestRevision != nil {
-		outputConfig += fmt.Sprintf("\tlatest_revision = %#v\n", *r.LatestRevision)
-	}
-	if r.Percent != nil {
-		outputConfig += fmt.Sprintf("\tpercent = %#v\n", *r.Percent)
-	}
-	if r.RevisionName != nil {
-		outputConfig += fmt.Sprintf("\trevision_name = %#v\n", *r.RevisionName)
-	}
-	if r.Tag != nil {
-		outputConfig += fmt.Sprintf("\ttag = %#v\n", *r.Tag)
-	}
-	return outputConfig + "}"
-}
-
-func convertRunServiceStatusToHCL(r *run.ServiceStatus) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceStatusAddressToHCL(r *run.ServiceStatusAddress) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceStatusConditionsToHCL(r *run.ServiceStatusConditions) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceStatusConditionsLastTransitionTimeToHCL(r *run.ServiceStatusConditionsLastTransitionTime) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
-func convertRunServiceStatusTrafficToHCL(r *run.ServiceStatusTraffic) string {
-	if r == nil {
-		return ""
-	}
-	outputConfig := "{\n"
-	return outputConfig + "}"
-}
-
 func convertAssuredWorkloadsWorkloadBetaKmsSettings(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -3611,6 +3063,51 @@ func convertCloudbuildWorkerPoolBetaWorkerConfigList(i interface{}) (out []map[s
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertCloudbuildWorkerPoolBetaWorkerConfig(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleBetaMatch(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"layer4Configs": in["layer4_configs"],
+		"destIPRanges":  in["dest_ip_ranges"],
+		"srcIPRanges":   in["src_ip_ranges"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleBetaMatch(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchLayer4Configs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iPProtocol": in["ip_protocol"],
+		"ports":      in["ports"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleBetaMatchLayer4ConfigsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleBetaMatchLayer4Configs(v))
 	}
 	return out
 }
@@ -5091,6 +4588,51 @@ func convertAssuredWorkloadsWorkloadResourcesList(i interface{}) (out []map[stri
 	return out
 }
 
+func convertComputeFirewallPolicyRuleMatch(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"layer4Configs": in["layer4_configs"],
+		"destIPRanges":  in["dest_ip_ranges"],
+		"srcIPRanges":   in["src_ip_ranges"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleMatchList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleMatch(v))
+	}
+	return out
+}
+
+func convertComputeFirewallPolicyRuleMatchLayer4Configs(i interface{}) map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	in := i.(map[string]interface{})
+	return map[string]interface{}{
+		"iPProtocol": in["ip_protocol"],
+		"ports":      in["ports"],
+	}
+}
+
+func convertComputeFirewallPolicyRuleMatchLayer4ConfigsList(i interface{}) (out []map[string]interface{}) {
+	if i == nil {
+		return nil
+	}
+
+	for _, v := range i.([]interface{}) {
+		out = append(out, convertComputeFirewallPolicyRuleMatchLayer4Configs(v))
+	}
+	return out
+}
+
 func convertDataprocWorkflowTemplateJobs(i interface{}) map[string]interface{} {
 	if i == nil {
 		return nil
@@ -6246,1155 +5788,6 @@ func convertEventarcTriggerTransportPubsubList(i interface{}) (out []map[string]
 
 	for _, v := range i.([]interface{}) {
 		out = append(out, convertEventarcTriggerTransportPubsub(v))
-	}
-	return out
-}
-
-func convertRunServiceMetadata(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"annotations":                in["annotations"],
-		"clusterName":                in["cluster_name"],
-		"finalizers":                 in["finalizers"],
-		"generateName":               in["generate_name"],
-		"labels":                     in["labels"],
-		"namespace":                  in["namespace"],
-		"ownerReferences":            in["owner_references"],
-		"createTime":                 convertRunServiceMetadataCreateTime(in["create_time"]),
-		"deleteTime":                 convertRunServiceMetadataDeleteTime(in["delete_time"]),
-		"deletionGracePeriodSeconds": in["deletion_grace_period_seconds"],
-		"generation":                 in["generation"],
-		"resourceVersion":            in["resource_version"],
-		"selfLink":                   in["self_link"],
-		"uid":                        in["uid"],
-	}
-}
-
-func convertRunServiceMetadataList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceMetadata(v))
-	}
-	return out
-}
-
-func convertRunServiceMetadataOwnerReferences(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"apiVersion":         in["api_version"],
-		"blockOwnerDeletion": in["block_owner_deletion"],
-		"controller":         in["controller"],
-		"kind":               in["kind"],
-		"name":               in["name"],
-		"uid":                in["uid"],
-	}
-}
-
-func convertRunServiceMetadataOwnerReferencesList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceMetadataOwnerReferences(v))
-	}
-	return out
-}
-
-func convertRunServiceMetadataCreateTime(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"nanos":   in["nanos"],
-		"seconds": in["seconds"],
-	}
-}
-
-func convertRunServiceMetadataCreateTimeList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceMetadataCreateTime(v))
-	}
-	return out
-}
-
-func convertRunServiceMetadataDeleteTime(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"nanos":   in["nanos"],
-		"seconds": in["seconds"],
-	}
-}
-
-func convertRunServiceMetadataDeleteTimeList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceMetadataDeleteTime(v))
-	}
-	return out
-}
-
-func convertRunServiceSpec(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"template": convertRunServiceSpecTemplate(in["template"]),
-		"traffic":  in["traffic"],
-	}
-}
-
-func convertRunServiceSpecList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpec(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplate(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"metadata": convertRunServiceSpecTemplateMetadata(in["metadata"]),
-		"spec":     convertRunServiceSpecTemplateSpec(in["spec"]),
-	}
-}
-
-func convertRunServiceSpecTemplateList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplate(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateMetadata(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"annotations":                in["annotations"],
-		"clusterName":                in["cluster_name"],
-		"finalizers":                 in["finalizers"],
-		"generateName":               in["generate_name"],
-		"labels":                     in["labels"],
-		"name":                       in["name"],
-		"namespace":                  in["namespace"],
-		"ownerReferences":            in["owner_references"],
-		"createTime":                 convertRunServiceSpecTemplateMetadataCreateTime(in["create_time"]),
-		"deleteTime":                 convertRunServiceSpecTemplateMetadataDeleteTime(in["delete_time"]),
-		"deletionGracePeriodSeconds": in["deletion_grace_period_seconds"],
-		"generation":                 in["generation"],
-		"resourceVersion":            in["resource_version"],
-		"selfLink":                   in["self_link"],
-		"uid":                        in["uid"],
-	}
-}
-
-func convertRunServiceSpecTemplateMetadataList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateMetadata(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateMetadataOwnerReferences(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"apiVersion":         in["api_version"],
-		"blockOwnerDeletion": in["block_owner_deletion"],
-		"controller":         in["controller"],
-		"kind":               in["kind"],
-		"name":               in["name"],
-		"uid":                in["uid"],
-	}
-}
-
-func convertRunServiceSpecTemplateMetadataOwnerReferencesList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateMetadataOwnerReferences(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateMetadataCreateTime(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"nanos":   in["nanos"],
-		"seconds": in["seconds"],
-	}
-}
-
-func convertRunServiceSpecTemplateMetadataCreateTimeList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateMetadataCreateTime(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateMetadataDeleteTime(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"nanos":   in["nanos"],
-		"seconds": in["seconds"],
-	}
-}
-
-func convertRunServiceSpecTemplateMetadataDeleteTimeList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateMetadataDeleteTime(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpec(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"containerConcurrency": in["container_concurrency"],
-		"containers":           in["containers"],
-		"serviceAccountName":   in["service_account_name"],
-		"timeoutSeconds":       in["timeout_seconds"],
-		"volumes":              in["volumes"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpec(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainers(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"args":                     in["args"],
-		"command":                  in["command"],
-		"env":                      in["env"],
-		"envFrom":                  in["env_from"],
-		"image":                    in["image"],
-		"imagePullPolicy":          in["image_pull_policy"],
-		"livenessProbe":            convertRunServiceSpecTemplateSpecContainersLivenessProbe(in["liveness_probe"]),
-		"name":                     in["name"],
-		"ports":                    in["ports"],
-		"readinessProbe":           convertRunServiceSpecTemplateSpecContainersReadinessProbe(in["readiness_probe"]),
-		"resources":                convertRunServiceSpecTemplateSpecContainersResources(in["resources"]),
-		"securityContext":          convertRunServiceSpecTemplateSpecContainersSecurityContext(in["security_context"]),
-		"terminationMessagePath":   in["termination_message_path"],
-		"terminationMessagePolicy": in["termination_message_policy"],
-		"volumeMounts":             in["volume_mounts"],
-		"workingDir":               in["working_dir"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainers(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnv(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name":      in["name"],
-		"value":     in["value"],
-		"valueFrom": convertRunServiceSpecTemplateSpecContainersEnvValueFrom(in["value_from"]),
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnv(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFrom(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"configMapKeyRef": convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRef(in["config_map_key_ref"]),
-		"secretKeyRef":    convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRef(in["secret_key_ref"]),
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvValueFrom(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRef(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"key":                  in["key"],
-		"localObjectReference": convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReference(in["local_object_reference"]),
-		"name":                 in["name"],
-		"optional":             in["optional"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRef(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReference(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name": in["name"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReferenceList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvValueFromConfigMapKeyRefLocalObjectReference(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRef(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"key":                  in["key"],
-		"localObjectReference": convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReference(in["local_object_reference"]),
-		"name":                 in["name"],
-		"optional":             in["optional"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRef(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReference(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name": in["name"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReferenceList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvValueFromSecretKeyRefLocalObjectReference(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFrom(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"configMapRef": convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRef(in["config_map_ref"]),
-		"prefix":       in["prefix"],
-		"secretRef":    convertRunServiceSpecTemplateSpecContainersEnvFromSecretRef(in["secret_ref"]),
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvFrom(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRef(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"localObjectReference": convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReference(in["local_object_reference"]),
-		"name":                 in["name"],
-		"optional":             in["optional"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRef(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReference(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name": in["name"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReferenceList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvFromConfigMapRefLocalObjectReference(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRef(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"localObjectReference": convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReference(in["local_object_reference"]),
-		"name":                 in["name"],
-		"optional":             in["optional"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvFromSecretRef(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReference(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name": in["name"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReferenceList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersEnvFromSecretRefLocalObjectReference(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbe(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"exec":                convertRunServiceSpecTemplateSpecContainersLivenessProbeExec(in["exec"]),
-		"failureThreshold":    in["failure_threshold"],
-		"httpGet":             convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGet(in["http_get"]),
-		"initialDelaySeconds": in["initial_delay_seconds"],
-		"periodSeconds":       in["period_seconds"],
-		"successThreshold":    in["success_threshold"],
-		"tcpSocket":           convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocket(in["tcp_socket"]),
-		"timeoutSeconds":      in["timeout_seconds"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersLivenessProbe(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeExec(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"command": in["command"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeExecList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersLivenessProbeExec(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGet(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"host":        in["host"],
-		"httpHeaders": in["http_headers"],
-		"path":        in["path"],
-		"scheme":      in["scheme"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGet(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeaders(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name":  in["name"],
-		"value": in["value"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeadersList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersLivenessProbeHttpGetHttpHeaders(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocket(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"host": in["host"],
-		"port": in["port"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocketList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersLivenessProbeTcpSocket(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersPorts(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"containerPort": in["container_port"],
-		"name":          in["name"],
-		"protocol":      in["protocol"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersPortsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersPorts(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbe(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"exec":                convertRunServiceSpecTemplateSpecContainersReadinessProbeExec(in["exec"]),
-		"failureThreshold":    in["failure_threshold"],
-		"httpGet":             convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGet(in["http_get"]),
-		"initialDelaySeconds": in["initial_delay_seconds"],
-		"periodSeconds":       in["period_seconds"],
-		"successThreshold":    in["success_threshold"],
-		"tcpSocket":           convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocket(in["tcp_socket"]),
-		"timeoutSeconds":      in["timeout_seconds"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersReadinessProbe(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeExec(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"command": in["command"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeExecList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersReadinessProbeExec(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGet(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"host":        in["host"],
-		"httpHeaders": in["http_headers"],
-		"path":        in["path"],
-		"scheme":      in["scheme"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGet(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeaders(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"name":  in["name"],
-		"value": in["value"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeadersList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersReadinessProbeHttpGetHttpHeaders(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocket(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"host": in["host"],
-		"port": in["port"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocketList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersReadinessProbeTcpSocket(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersResources(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"limits":   in["limits"],
-		"requests": in["requests"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersResourcesList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersResources(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersSecurityContext(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"runAsUser": in["run_as_user"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersSecurityContextList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersSecurityContext(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecContainersVolumeMounts(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"mountPath": in["mount_path"],
-		"name":      in["name"],
-		"readOnly":  in["read_only"],
-		"subPath":   in["sub_path"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecContainersVolumeMountsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecContainersVolumeMounts(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecVolumes(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"configMap": convertRunServiceSpecTemplateSpecVolumesConfigMap(in["config_map"]),
-		"name":      in["name"],
-		"secret":    convertRunServiceSpecTemplateSpecVolumesSecret(in["secret"]),
-	}
-}
-
-func convertRunServiceSpecTemplateSpecVolumesList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecVolumes(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecVolumesConfigMap(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"defaultMode": in["default_mode"],
-		"items":       in["items"],
-		"name":        in["name"],
-		"optional":    in["optional"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecVolumesConfigMapList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecVolumesConfigMap(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecVolumesConfigMapItems(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"key":  in["key"],
-		"mode": in["mode"],
-		"path": in["path"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecVolumesConfigMapItemsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecVolumesConfigMapItems(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecVolumesSecret(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"defaultMode": in["default_mode"],
-		"items":       in["items"],
-		"optional":    in["optional"],
-		"secretName":  in["secret_name"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecVolumesSecretList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecVolumesSecret(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTemplateSpecVolumesSecretItems(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"key":  in["key"],
-		"mode": in["mode"],
-		"path": in["path"],
-	}
-}
-
-func convertRunServiceSpecTemplateSpecVolumesSecretItemsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTemplateSpecVolumesSecretItems(v))
-	}
-	return out
-}
-
-func convertRunServiceSpecTraffic(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"configurationName": in["configuration_name"],
-		"latestRevision":    in["latest_revision"],
-		"percent":           in["percent"],
-		"revisionName":      in["revision_name"],
-		"tag":               in["tag"],
-		"url":               in["url"],
-	}
-}
-
-func convertRunServiceSpecTrafficList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceSpecTraffic(v))
-	}
-	return out
-}
-
-func convertRunServiceStatus(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"address":                   convertRunServiceStatusAddress(in["address"]),
-		"conditions":                in["conditions"],
-		"latestCreatedRevisionName": in["latest_created_revision_name"],
-		"latestReadyRevisionName":   in["latest_ready_revision_name"],
-		"observedGeneration":        in["observed_generation"],
-		"traffic":                   in["traffic"],
-		"url":                       in["url"],
-	}
-}
-
-func convertRunServiceStatusList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceStatus(v))
-	}
-	return out
-}
-
-func convertRunServiceStatusAddress(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"url": in["url"],
-	}
-}
-
-func convertRunServiceStatusAddressList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceStatusAddress(v))
-	}
-	return out
-}
-
-func convertRunServiceStatusConditions(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"lastTransitionTime": convertRunServiceStatusConditionsLastTransitionTime(in["last_transition_time"]),
-		"message":            in["message"],
-		"reason":             in["reason"],
-		"severity":           in["severity"],
-		"status":             in["status"],
-		"type":               in["type"],
-	}
-}
-
-func convertRunServiceStatusConditionsList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceStatusConditions(v))
-	}
-	return out
-}
-
-func convertRunServiceStatusConditionsLastTransitionTime(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"nanos":   in["nanos"],
-		"seconds": in["seconds"],
-	}
-}
-
-func convertRunServiceStatusConditionsLastTransitionTimeList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceStatusConditionsLastTransitionTime(v))
-	}
-	return out
-}
-
-func convertRunServiceStatusTraffic(i interface{}) map[string]interface{} {
-	if i == nil {
-		return nil
-	}
-	in := i.(map[string]interface{})
-	return map[string]interface{}{
-		"configurationName": in["configuration_name"],
-		"latestRevision":    in["latest_revision"],
-		"percent":           in["percent"],
-		"revisionName":      in["revision_name"],
-		"tag":               in["tag"],
-		"url":               in["url"],
-	}
-}
-
-func convertRunServiceStatusTrafficList(i interface{}) (out []map[string]interface{}) {
-	if i == nil {
-		return nil
-	}
-
-	for _, v := range i.([]interface{}) {
-		out = append(out, convertRunServiceStatusTraffic(v))
 	}
 	return out
 }

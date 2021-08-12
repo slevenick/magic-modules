@@ -581,7 +581,7 @@ func (r Resource) getSamples(docs bool) []Sample {
 }
 
 func (r *Resource) getSampleAccessoryFolder() string {
-	resourceType := strings.ToLower(r.Type())
+	resourceType := jsonToSnakeCase(r.Type())
 	packageName := strings.ToLower(r.productMetadata.PackageName)
 	sampleAccessoryFolder := path.Join(*tPath, packageName, "samples", resourceType)
 	return sampleAccessoryFolder
@@ -670,7 +670,7 @@ func (r *Resource) loadDCLSamples() []Sample {
 	sampleAccessoryFolder := r.getSampleAccessoryFolder()
 	packagePath := r.productMetadata.PackagePath
 	version := r.versionMetadata.V
-	resourceType := strings.ToLower(r.Type())
+	resourceType := jsonToSnakeCase(r.Type())
 	sampleFriendlyMetaPath := path.Join(sampleAccessoryFolder, "meta.yaml")
 	samples := []Sample{}
 
