@@ -288,7 +288,7 @@ func expandBootDisk(d TerraformResourceData, config *Config, project string) (*c
 			disk.InitializeParams.DiskSizeGb = int64(v.(int))
 		}
 
-		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.type"); ok {
+		if v, ok := d.GetOkExists("boot_disk.0.initialize_params.0.type"); ok {
 			diskTypeName := v.(string)
 			diskType, err := readDiskType(config, d, diskTypeName)
 			if err != nil {
