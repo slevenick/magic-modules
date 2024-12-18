@@ -334,6 +334,8 @@ type Resource struct {
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
 
 	ImportPath string `yaml:"-"`
+
+	ApiVersion string `yaml:"api_version,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
