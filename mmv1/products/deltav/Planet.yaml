@@ -14,11 +14,11 @@
 ---
 name: 'Planet'
 description: |
-  A set of reusable connection configurations to be used as a source or destination for a stream.
+  A planet
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/datastream/docs/create-connection-profiles'
-  api: 'https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.connectionProfiles'
+    'Official Documentation': 'None'
+  api: 'None'
 api_version: "2024-04-11-preview"
 id_format: 'projects/{{project}}/locations/{{location}}/planets/{{planet_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/planets'
@@ -59,14 +59,14 @@ parameters:
   - name: 'planetId'
     type: String
     description: |-
-      The connection profile identifier.
+      Planet identifier
     url_param_only: true
     required: true
     immutable: true
   - name: 'location'
     type: String
     description: |-
-      The connection profile identifier.
+      Location
     url_param_only: true
     required: true
     immutable: true
@@ -74,16 +74,16 @@ properties:
   - name: 'name'
     type: String
     description: |-
-      The connection profile identifier.
+      Required by the API due to bad implementation, not actually valid for a real resource as it conflicts with planetId
     ignore_read: true
   - name: 'celestialFacts'
     type: NestedObject
     description: |
-      Source connection profile configuration.
+      Object containing planet info
     required: true
     properties:
       - name: 'mass'
         type: Double
         description: |
-          Source connection profile resource. Format: projects/{project}/locations/{location}/connectionProfiles/{name}
+          Mass of the planet
         required: true
