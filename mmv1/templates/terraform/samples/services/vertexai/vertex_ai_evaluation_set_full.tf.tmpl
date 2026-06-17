@@ -1,0 +1,17 @@
+resource "google_vertex_ai_evaluation_item" "item1" {
+  display_name         = "item1_for_full_set"
+  evaluation_item_type = "REQUEST"
+}
+
+resource "google_vertex_ai_evaluation_item" "item2" {
+  display_name         = "item2_for_full_set"
+  evaluation_item_type = "REQUEST"
+}
+
+resource "google_vertex_ai_evaluation_set" "{{$.PrimaryResourceId}}" {
+  display_name     = "full_evaluation_set"
+  evaluation_items = [
+    google_vertex_ai_evaluation_item.item1.id,
+    google_vertex_ai_evaluation_item.item2.id,
+  ]
+}

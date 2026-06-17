@@ -1,0 +1,9 @@
+resource "google_vertex_ai_evaluation_item" "item" {
+  display_name         = "item_for_basic_set"
+  evaluation_item_type = "REQUEST"
+}
+
+resource "google_vertex_ai_evaluation_set" "{{$.PrimaryResourceId}}" {
+  display_name     = "basic_evaluation_set"
+  evaluation_items = [google_vertex_ai_evaluation_item.item.id]
+}

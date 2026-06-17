@@ -1,0 +1,81 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EvaluationSet
+description: Description
+base_url: projects/{{project}}/locations/{{region}}/evaluationSets
+self_link: projects/{{project}}/locations/{{region}}/evaluationSets/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/evaluationSets
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{region}}/evaluationSets/{{name}}
+async:
+  type: OpAsync
+  operation:
+    base_url: projects/{{project}}/locations/{{region}}/evaluationSets
+  actions:
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: RXZhbHVhdGlvblNldEF1dG9nZW5WMkFnZW50
+samples:
+  - name: vertex_ai_evaluation_set_basic
+    primary_resource_id: basic_set
+    steps:
+      - name: vertex_ai_evaluation_set_basic
+  - name: vertex_ai_evaluation_set_full
+    primary_resource_id: full_set
+    steps:
+      - name: vertex_ai_evaluation_set_full
+parameters:
+  - name: region
+    type: String
+    description: The region of the resource. eg us-central1
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: Timestamp when this item was created.
+    output: true
+  - name: displayName
+    type: String
+    required: true
+    description: The display name of the EvaluationSet.
+  - name: evaluationItems
+    type: Array
+    required: true
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+    description: The EvaluationItems that are part of this dataset.
+    item_type:
+      type: String
+  - name: labels
+    type: KeyValueLabels
+    description: Labels for the EvaluationSet.
+  - name: metadata
+    type: KeyValuePairs
+    description: Metadata for the EvaluationSet.
+  - name: name
+    type: String
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    description: |-
+      Identifier. The resource name of the EvaluationSet.
+      Format:
+      `projects/{project}/locations/{location}/evaluationSets/{evaluation_set}`
+    output: true
+  - name: updateTime
+    type: String
+    description: Timestamp when this item was last updated.
+    output: true

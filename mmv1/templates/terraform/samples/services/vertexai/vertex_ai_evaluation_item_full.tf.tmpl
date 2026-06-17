@@ -1,0 +1,10 @@
+resource "google_vertex_ai_evaluation_item" "{{$.PrimaryResourceId}}" {
+  display_name         = "full_evaluation_item"
+  evaluation_item_type = "REQUEST"
+  labels = {
+    env = "test"
+  }
+  metadata = {
+    team = "ml"
+  }
+}

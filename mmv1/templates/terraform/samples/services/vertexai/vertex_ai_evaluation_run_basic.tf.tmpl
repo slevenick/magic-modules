@@ -1,0 +1,26 @@
+resource "google_vertex_ai_evaluation_item" "item" {
+  display_name         = "item_for_basic_run"
+  evaluation_item_type = "REQUEST"
+}
+
+resource "google_vertex_ai_evaluation_set" "set" {
+  display_name     = "set_for_basic_run"
+  evaluation_items = [google_vertex_ai_evaluation_item.item.id]
+}
+
+resource "google_vertex_ai_evaluation_run" "{{$.PrimaryResourceId}}" {
+  display_name = "basic_evaluation_run"
+  data_source {
+    evaluation_set = google_vertex_ai_evaluation_set.set.id
+  }
+  evaluation_config {
+    metrics {
+      metric        = "exact_match"
+      input_mapping = {}
+      computation_based_metric_spec {
+        type       = "EXACT_MATCH"
+        parameters = {}
+      }
+    }
+  }
+}

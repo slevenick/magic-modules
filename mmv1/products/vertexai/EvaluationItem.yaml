@@ -1,0 +1,1307 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EvaluationItem
+description: Description
+base_url: projects/{{project}}/locations/{{region}}/evaluationItems
+self_link: projects/{{project}}/locations/{{region}}/evaluationItems/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/evaluationItems
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{region}}/evaluationItems/{{name}}
+async:
+  type: OpAsync
+  operation:
+    base_url: projects/{{project}}/locations/{{region}}/evaluationItems
+  actions:
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: RXZhbHVhdGlvbkl0ZW1BdXRvZ2VuVjJBZ2VudA==
+samples:
+  - name: vertex_ai_evaluation_item_basic
+    primary_resource_id: basic_item
+    steps:
+      - name: vertex_ai_evaluation_item_basic
+  - name: vertex_ai_evaluation_item_full
+    primary_resource_id: full_item
+    steps:
+      - name: vertex_ai_evaluation_item_full
+parameters:
+  - name: region
+    type: String
+    description: The region of the resource. eg us-central1
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: Timestamp when this item was created.
+    output: true
+  - name: displayName
+    type: String
+    required: true
+    description: The display name of the EvaluationItem.
+  - name: error
+    type: NestedObject
+    output: true
+    description: |-
+      The `Status` type defines a logical error model that is suitable for
+      different programming environments, including REST APIs and RPC APIs. It is
+      used by [gRPC](https://github.com/grpc). Each `Status` message contains
+      three pieces of data: error code, error message, and error details.
+
+      You can find out more about this error model and how to work with it in the
+      [API Design Guide](https://cloud.google.com/apis/design/errors).
+    properties:
+      - name: code
+        type: Integer
+        description: The status code, which should be an enum value of google.rpc.Code.
+      - name: details
+        type: Array
+        description: |-
+          A list of messages that carry the error details.  There is a common set of
+          message types for APIs to use.
+        item_type:
+          type: NestedObject
+          properties: []
+      - name: message
+        type: String
+        description: |-
+          A developer-facing error message, which should be in English. Any
+          user-facing error message should be localized and sent in the
+          google.rpc.Status.details field, or localized by the client.
+  - name: evaluationItemType
+    type: String
+    required: true
+    description: |-
+      The type of the EvaluationItem.
+      Possible values:
+      REQUEST
+      RESULT
+  - name: evaluationRequest
+    type: NestedObject
+    description: |-
+      A single evaluation request supporting input for both single-turn model
+      generation and multi-turn agent execution traces.
+
+      Valid input modes:
+      1. Inference Mode: `prompt` is set (containing text or AgentData context).
+      2. Offline Eval Mode: `prompt` is unset, and `candidate_responses` contains
+      `agent_data` (the completed execution trace).
+
+      Validation Rule: Either `prompt` must be set, OR at least one of the
+      `candidate_responses` must contain `agent_data`.
+    properties:
+      - name: candidateResponses
+        type: Array
+        description: Responses from model under test and other baseline models for comparison.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: candidate
+              type: String
+              required: true
+              description: The name of the candidate that produced the response.
+            - name: error
+              type: NestedObject
+              description: |-
+                The `Status` type defines a logical error model that is suitable for
+                different programming environments, including REST APIs and RPC APIs. It is
+                used by [gRPC](https://github.com/grpc). Each `Status` message contains
+                three pieces of data: error code, error message, and error details.
+
+                You can find out more about this error model and how to work with it in the
+                [API Design Guide](https://cloud.google.com/apis/design/errors).
+              properties:
+                - name: code
+                  type: Integer
+                  description: The status code, which should be an enum value of google.rpc.Code.
+                - name: details
+                  type: Array
+                  description: |-
+                    A list of messages that carry the error details.  There is a common set of
+                    message types for APIs to use.
+                  item_type:
+                    type: NestedObject
+                    properties: []
+                - name: message
+                  type: String
+                  description: |-
+                    A developer-facing error message, which should be in English. Any
+                    user-facing error message should be localized and sent in the
+                    google.rpc.Status.details field, or localized by the client.
+            - name: text
+              type: String
+              description: Text response.
+            - name: value
+              type: NestedObject
+              description: Fields and values that can be used to populate the response template.
+              properties: []
+      - name: goldenResponse
+        type: NestedObject
+        description: Responses from model or agent.
+        properties:
+          - name: candidate
+            type: String
+            required: true
+            description: The name of the candidate that produced the response.
+          - name: error
+            type: NestedObject
+            description: |-
+              The `Status` type defines a logical error model that is suitable for
+              different programming environments, including REST APIs and RPC APIs. It is
+              used by [gRPC](https://github.com/grpc). Each `Status` message contains
+              three pieces of data: error code, error message, and error details.
+
+              You can find out more about this error model and how to work with it in the
+              [API Design Guide](https://cloud.google.com/apis/design/errors).
+            properties:
+              - name: code
+                type: Integer
+                description: The status code, which should be an enum value of google.rpc.Code.
+              - name: details
+                type: Array
+                description: |-
+                  A list of messages that carry the error details.  There is a common set of
+                  message types for APIs to use.
+                item_type:
+                  type: NestedObject
+                  properties: []
+              - name: message
+                type: String
+                description: |-
+                  A developer-facing error message, which should be in English. Any
+                  user-facing error message should be localized and sent in the
+                  google.rpc.Status.details field, or localized by the client.
+          - name: text
+            type: String
+            description: Text response.
+          - name: value
+            type: NestedObject
+            description: Fields and values that can be used to populate the response template.
+            properties: []
+      - name: prompt
+        type: NestedObject
+        description: |-
+          Prompt to be evaluated. This can represent a single-turn prompt or a
+          multi-turn conversation for agent evaluations.
+        properties:
+          - name: promptTemplateData
+            type: NestedObject
+            description: Message to hold a prompt template and the values to populate the template.
+            properties:
+              - name: values
+                type: Map
+                description: The values for fields in the prompt template.
+                value_type:
+                  type: NestedObject
+                  properties:
+                    - name: parts
+                      type: Array
+                      required: true
+                      description: |-
+                        A list of Part objects
+                        that make up a single message. Parts of a message can have different MIME
+                        types.
+
+                        A Content message must have at
+                        least one Part.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: codeExecutionResult
+                            type: NestedObject
+                            description: |-
+                              Result of executing the ExecutableCode.
+
+                              Generated only when the `CodeExecution` tool is used.
+                            properties:
+                              - name: outcome
+                                type: String
+                                required: true
+                                description: |-
+                                  Outcome of the code execution.
+                                  Possible values:
+                                  OUTCOME_OK
+                                  OUTCOME_FAILED
+                                  OUTCOME_DEADLINE_EXCEEDED
+                              - name: output
+                                type: String
+                                description: |-
+                                  Contains stdout when code execution is successful, stderr or other
+                                  description otherwise.
+                          - name: customMetadata
+                            type: KeyValuePairs
+                            description: Custom metadata for the part.
+                          - name: executableCode
+                            type: NestedObject
+                            description: |-
+                              Code generated by the model that is meant to be executed, and the result
+                              returned to the model.
+
+                              Generated when using the `CodeExecution` tool, in which the code will
+                              be automatically executed, and a corresponding CodeExecutionResult will
+                              also be generated.
+                            properties:
+                              - name: code
+                                type: String
+                                required: true
+                                description: The code to be executed.
+                              - name: language
+                                type: String
+                                required: true
+                                description: |-
+                                  Programming language of the `code`.
+                                  Possible values:
+                                  PYTHON
+                                  BASH
+                          - name: fileData
+                            type: NestedObject
+                            description: |-
+                              URI-based data.
+
+                              A FileData message contains a URI
+                              pointing to data of a specific media type. It is used to represent images,
+                              audio, and video stored in Google Cloud Storage.
+                            properties:
+                              - name: displayName
+                                type: String
+                                description: |-
+                                  The display name of the file. Used to provide a label or filename
+                                  to distinguish files.
+
+                                  This field is only returned in `PromptMessage` for prompt management. It is
+                                  used in the Gemini calls only when server side tools (`code_execution`,
+                                  `google_search`, and `url_context`) are enabled.
+                              - name: fileUri
+                                type: String
+                                required: true
+                                description: The URI of the file in Google Cloud Storage.
+                              - name: mimeType
+                                type: String
+                                required: true
+                                description: The IANA standard MIME type of the source data.
+                          - name: functionCall
+                            type: NestedObject
+                            description: |-
+                              A predicted FunctionCall returned from the model that
+                              contains a string representing the FunctionDeclaration.name and
+                              a structured JSON object containing the parameters and their values.
+                            properties:
+                              - name: args
+                                type: KeyValuePairs
+                                description: |-
+                                  The function parameters and values in JSON object format.
+                                  See FunctionDeclaration.parameters for parameter details.
+                              - name: name
+                                type: String
+                                description: |-
+                                  The name of the function to call.
+                                  Matches FunctionDeclaration.name.
+                              - name: partialArgs
+                                type: Array
+                                description: |-
+                                  The partial argument value of the function call.
+                                  If provided, represents the arguments/fields that are streamed
+                                  incrementally.
+                                item_type:
+                                  type: NestedObject
+                                  properties:
+                                    - name: boolValue
+                                      type: Boolean
+                                      description: Represents a boolean value.
+                                    - name: jsonPath
+                                      type: String
+                                      required: true
+                                      description: |-
+                                        A JSON Path (RFC 9535) to the argument being streamed.
+                                        https://datatracker.ietf.org/doc/html/rfc9535. e.g. "$.foo.bar[0].data".
+                                    - name: nullValue
+                                      type: String
+                                      description: |-
+                                        Possible values:
+                                        NULL_VALUE
+                                    - name: numberValue
+                                      type: Double
+                                      description: Represents a double value.
+                                    - name: stringValue
+                                      type: String
+                                      description: Represents a string value.
+                                    - name: willContinue
+                                      type: Boolean
+                                      description: |-
+                                        Whether this is not the last part of the same json_path.
+                                        If true, another PartialArg message for the current json_path is expected
+                                        to follow.
+                              - name: willContinue
+                                type: Boolean
+                                description: |-
+                                  Whether this is the last part of the FunctionCall.
+                                  If true, another partial message for the current FunctionCall is expected
+                                  to follow.
+                          - name: functionResponse
+                            type: NestedObject
+                            description: |-
+                              The result output from a FunctionCall that contains
+                              a string representing the FunctionDeclaration.name and a structured
+                              JSON object containing any output from the function is used as context to
+                              the model. This should contain the result of a `FunctionCall` made based
+                              on model prediction.
+                            properties:
+                              - name: name
+                                type: String
+                                required: true
+                                description: |-
+                                  The name of the function to call.
+                                  Matches FunctionDeclaration.name and FunctionCall.name.
+                              - name: parts
+                                type: Array
+                                description: |-
+                                  Ordered `Parts` that constitute a function response. Parts may have
+                                  different IANA MIME types.
+                                item_type:
+                                  type: NestedObject
+                                  properties:
+                                    - name: fileData
+                                      type: NestedObject
+                                      description: URI based data for function response.
+                                      properties:
+                                        - name: displayName
+                                          type: String
+                                          description: |-
+                                            Display name of the file data.
+
+                                            Used to provide a label or filename to distinguish file datas.
+
+                                            This field is only returned in PromptMessage for prompt management.
+                                            It is currently used in the Gemini GenerateContent calls only when server
+                                            side tools (code_execution, google_search, and url_context) are enabled.
+                                        - name: fileUri
+                                          type: String
+                                          required: true
+                                          description: URI.
+                                        - name: mimeType
+                                          type: String
+                                          required: true
+                                          description: The IANA standard MIME type of the source data.
+                                    - name: inlineData
+                                      type: NestedObject
+                                      description: |-
+                                        Raw media bytes for function response.
+
+                                        Text should not be sent as raw bytes, use the 'text' field.
+                                      properties:
+                                        - name: data
+                                          type: String
+                                          required: true
+                                          description: Raw bytes.
+                                        - name: displayName
+                                          type: String
+                                          description: |-
+                                            Display name of the blob.
+
+                                            Used to provide a label or filename to distinguish blobs.
+
+                                            This field is only returned in PromptMessage for prompt management.
+                                            It is currently used in the Gemini GenerateContent calls only when server
+                                            side tools (code_execution, google_search, and url_context) are enabled.
+                                        - name: mimeType
+                                          type: String
+                                          required: true
+                                          description: The IANA standard MIME type of the source data.
+                                    - name: retrievalResult
+                                      type: NestedObject
+                                      description: |-
+                                        Represents a retrieval result that is part of a `FunctionResponsePart`
+                                        message.
+                                      properties:
+                                        - name: annotations
+                                          type: KeyValuePairs
+                                          description: Other optional metadata about the result. This is not sent to the model.
+                                        - name: content
+                                          type: String
+                                          description: |-
+                                            The content (snippet) of the result. This will be sent to the model for
+                                            response generation.
+                                        - name: displayContent
+                                          type: String
+                                          description: |-
+                                            If set, this will be used in the output grounding metadata, instead of
+                                            the content field; otherwise, the content field will be used.
+                                            This field is never sent to the model.
+                                        - name: query
+                                          type: String
+                                          description: |-
+                                            The query that was used to retrieve the result. This provides extra context
+                                            as to what the result is about.
+                                        - name: title
+                                          type: String
+                                          description: |-
+                                            The title of the result. This will be sent to the model for response
+                                            generation.
+                                        - name: uri
+                                          type: String
+                                          description: The URI of the result.
+                              - name: response
+                                type: KeyValuePairs
+                                required: true
+                                description: |-
+                                  The function response in JSON object format.
+                                  Use "output" key to specify function output and "error" key to specify
+                                  error details (if any). If "output" and "error" keys are not specified,
+                                  then whole "response" is treated as function output.
+                              - name: scheduling
+                                type: String
+                                description: |-
+                                  Specifies how the response should be scheduled in the conversation.
+                                  Only applicable to NON_BLOCKING function calls, is ignored otherwise.
+                                  Defaults to WHEN_IDLE.
+                                  Possible values:
+                                  SILENT
+                                  WHEN_IDLE
+                                  INTERRUPT
+                          - name: inlineData
+                            type: NestedObject
+                            description: |-
+                              A content blob.
+
+                              A Blob contains data of a specific
+                              media type. It is used to represent images, audio, and video.
+                            properties:
+                              - name: data
+                                type: String
+                                required: true
+                                description: The raw bytes of the data.
+                              - name: displayName
+                                type: String
+                                description: |-
+                                  The display name of the blob. Used to provide a label or filename
+                                  to distinguish blobs.
+
+                                  This field is only returned in `PromptMessage` for prompt management. It is
+                                  used in the Gemini calls only when server-side tools (`code_execution`,
+                                  `google_search`, and `url_context`) are enabled.
+                              - name: mimeType
+                                type: String
+                                required: true
+                                description: The IANA standard MIME type of the source data.
+                              - name: willContinue
+                                type: Boolean
+                                description: |-
+                                  When set, indicates that the next message in a streaming
+                                  connection is to be interpreted as a continuation of this `Blob`. The next
+                                  message must contain only the
+                                  Content of the same role as the
+                                  one containing this `Part`, and must contain a single
+                                  Part with `inline_data` and the same
+                                  `mime_type` as this `Blob`.
+                          - name: mediaResolution
+                            type: NestedObject
+                            description: |-
+                              per part media resolution.
+                              Media resolution for the input media.
+                            properties:
+                              - name: level
+                                type: String
+                                description: |-
+                                  The tokenization quality used for given media.
+                                  Possible values:
+                                  MEDIA_RESOLUTION_LOW
+                                  MEDIA_RESOLUTION_MEDIUM
+                                  MEDIA_RESOLUTION_HIGH
+                                  MEDIA_RESOLUTION_ULTRA_HIGH
+                              - name: numTokens
+                                type: Integer
+                                description: Specifies the required sequence length for media tokenization.
+                          - name: text
+                            type: String
+                            description: |-
+                              The text content of the part.
+                              When sent from the VSCode Gemini Code Assist extension, references to
+                              @mentioned items will be converted to markdown boldface text. For
+                              example `@my-repo` will be converted to and sent as `**my-repo**` by
+                              the IDE agent.
+                          - name: thought
+                            type: Boolean
+                            description: |-
+                              Indicates whether the `part` represents the model's thought
+                              process or reasoning.
+                          - name: thoughtSignature
+                            type: String
+                            description: |-
+                              An opaque signature for the thought so it can be reused in
+                              subsequent requests.
+                          - name: videoMetadata
+                            type: NestedObject
+                            description: |-
+                              Provides metadata for a video, including the start and end offsets for
+                              clipping and the frame rate.
+                            properties:
+                              - name: endOffset
+                                type: String
+                                description: The end offset of the video.
+                              - name: fps
+                                type: Double
+                                description: |-
+                                  The frame rate of the video sent to the model. If not specified,
+                                  the default value is 1.0. The valid range is (0.0, 24.0].
+                              - name: startOffset
+                                type: String
+                                description: The start offset of the video.
+                    - name: role
+                      type: String
+                      description: |-
+                        The producer of the content. Must be either 'user' or 'model'.
+
+                        If not set, the service will default to 'user'.
+                key_name: 'name'
+          - name: text
+            type: String
+            description: Text prompt.
+          - name: value
+            type: NestedObject
+            description: Fields and values that can be used to populate the prompt template.
+            properties: []
+      - name: rubrics
+        type: Map
+        description: |-
+          Named groups of rubrics associated with this prompt.
+          The key is a user-defined name for the rubric group.
+        value_type:
+          type: NestedObject
+          properties:
+            - name: displayName
+              type: String
+              description: |-
+                Human-readable name for the group. This should be unique
+                within a given context if used for display or selection.
+                Example: "Instruction Following V1", "Content Quality - Summarization
+                Task".
+            - name: groupId
+              type: String
+              description: Unique identifier for the group.
+            - name: rubrics
+              type: Array
+              description: Rubrics that are part of this group.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: content
+                    type: NestedObject
+                    description: Content of the rubric, defining the testable criteria.
+                    properties:
+                      - name: property
+                        type: NestedObject
+                        description: Defines criteria based on a specific property.
+                        properties:
+                          - name: description
+                            type: String
+                            description: |-
+                              Description of the property being evaluated.
+                              Example: "The model's response is grammatically correct."
+                  - name: importance
+                    type: String
+                    description: |-
+                      The relative importance of this rubric.
+                      Possible values:
+                      HIGH
+                      MEDIUM
+                      LOW
+                  - name: rubricId
+                    type: String
+                    description: |-
+                      Unique identifier for the rubric.
+                      This ID is used to refer to this rubric, e.g., in RubricVerdict.
+                  - name: type
+                    type: String
+                    description: |-
+                      A type designator for the rubric, which can inform how it's
+                      evaluated or interpreted by systems or users.
+                      It's recommended to use consistent, well-defined, upper snake_case strings.
+                      Examples: "SUMMARIZATION_QUALITY", "SAFETY_HARMFUL_CONTENT",
+                      "INSTRUCTION_ADHERENCE".
+        key_name: 'name'
+  - name: evaluationResponse
+    type: NestedObject
+    output: true
+    description: Evaluation result.
+    properties:
+      - name: candidateResults
+        type: Array
+        description: The results for the metric.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: additionalResults
+              type: NestedObject
+              description: Additional results for the metric.
+              properties: []
+            - name: candidate
+              type: String
+              required: true
+              description: |-
+                The candidate that is being evaluated. The value is the same as the
+                candidate name in the EvaluationRequest.
+            - name: explanation
+              type: String
+              description: The explanation for the metric.
+            - name: metric
+              type: String
+              required: true
+              description: The metric that was evaluated.
+            - name: rubricVerdicts
+              type: Array
+              description: The rubric verdicts for the metric.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: evaluatedRubric
+                    type: NestedObject
+                    description: |-
+                      Message representing a single testable criterion for evaluation.
+                      One input prompt could have multiple rubrics.
+                    properties:
+                      - name: content
+                        type: NestedObject
+                        description: Content of the rubric, defining the testable criteria.
+                        properties:
+                          - name: property
+                            type: NestedObject
+                            description: Defines criteria based on a specific property.
+                            properties:
+                              - name: description
+                                type: String
+                                description: |-
+                                  Description of the property being evaluated.
+                                  Example: "The model's response is grammatically correct."
+                      - name: importance
+                        type: String
+                        description: |-
+                          The relative importance of this rubric.
+                          Possible values:
+                          HIGH
+                          MEDIUM
+                          LOW
+                      - name: rubricId
+                        type: String
+                        description: |-
+                          Unique identifier for the rubric.
+                          This ID is used to refer to this rubric, e.g., in RubricVerdict.
+                      - name: type
+                        type: String
+                        description: |-
+                          A type designator for the rubric, which can inform how it's
+                          evaluated or interpreted by systems or users.
+                          It's recommended to use consistent, well-defined, upper snake_case strings.
+                          Examples: "SUMMARIZATION_QUALITY", "SAFETY_HARMFUL_CONTENT",
+                          "INSTRUCTION_ADHERENCE".
+                  - name: reasoning
+                    type: String
+                    description: |-
+                      Human-readable reasoning or explanation for the verdict.
+                      This can include specific examples or details from the evaluated content
+                      that justify the given verdict.
+                  - name: verdict
+                    type: Boolean
+                    description: |-
+                      Outcome of the evaluation against the rubric, represented as a
+                      boolean. `true` indicates a "Pass", `false` indicates a "Fail".
+            - name: score
+              type: Double
+              description: The score for the metric.
+      - name: evaluationRequest
+        type: String
+        required: true
+        description: |-
+          The request item that was evaluated.
+          Format:
+          projects/{project}/locations/{location}/evaluationItems/{evaluation_item}
+      - name: evaluationRun
+        type: String
+        required: true
+        description: |-
+          The evaluation run that was used to generate the result.
+          Format:
+          projects/{project}/locations/{location}/evaluationRuns/{evaluation_run}
+      - name: metadata
+        type: NestedObject
+        description: Metadata about the evaluation result.
+        properties: []
+      - name: metric
+        type: String
+        required: true
+        description: The metric that was evaluated.
+      - name: request
+        type: NestedObject
+        required: true
+        description: |-
+          A single evaluation request supporting input for both single-turn model
+          generation and multi-turn agent execution traces.
+
+          Valid input modes:
+          1. Inference Mode: `prompt` is set (containing text or AgentData context).
+          2. Offline Eval Mode: `prompt` is unset, and `candidate_responses` contains
+          `agent_data` (the completed execution trace).
+
+          Validation Rule: Either `prompt` must be set, OR at least one of the
+          `candidate_responses` must contain `agent_data`.
+        properties:
+          - name: candidateResponses
+            type: Array
+            description: Responses from model under test and other baseline models for comparison.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: candidate
+                  type: String
+                  required: true
+                  description: The name of the candidate that produced the response.
+                - name: error
+                  type: NestedObject
+                  description: |-
+                    The `Status` type defines a logical error model that is suitable for
+                    different programming environments, including REST APIs and RPC APIs. It is
+                    used by [gRPC](https://github.com/grpc). Each `Status` message contains
+                    three pieces of data: error code, error message, and error details.
+
+                    You can find out more about this error model and how to work with it in the
+                    [API Design Guide](https://cloud.google.com/apis/design/errors).
+                  properties:
+                    - name: code
+                      type: Integer
+                      description: The status code, which should be an enum value of google.rpc.Code.
+                    - name: details
+                      type: Array
+                      description: |-
+                        A list of messages that carry the error details.  There is a common set of
+                        message types for APIs to use.
+                      item_type:
+                        type: NestedObject
+                        properties: []
+                    - name: message
+                      type: String
+                      description: |-
+                        A developer-facing error message, which should be in English. Any
+                        user-facing error message should be localized and sent in the
+                        google.rpc.Status.details field, or localized by the client.
+                - name: text
+                  type: String
+                  description: Text response.
+                - name: value
+                  type: NestedObject
+                  description: Fields and values that can be used to populate the response template.
+                  properties: []
+          - name: goldenResponse
+            type: NestedObject
+            description: Responses from model or agent.
+            properties:
+              - name: candidate
+                type: String
+                required: true
+                description: The name of the candidate that produced the response.
+              - name: error
+                type: NestedObject
+                description: |-
+                  The `Status` type defines a logical error model that is suitable for
+                  different programming environments, including REST APIs and RPC APIs. It is
+                  used by [gRPC](https://github.com/grpc). Each `Status` message contains
+                  three pieces of data: error code, error message, and error details.
+
+                  You can find out more about this error model and how to work with it in the
+                  [API Design Guide](https://cloud.google.com/apis/design/errors).
+                properties:
+                  - name: code
+                    type: Integer
+                    description: The status code, which should be an enum value of google.rpc.Code.
+                  - name: details
+                    type: Array
+                    description: |-
+                      A list of messages that carry the error details.  There is a common set of
+                      message types for APIs to use.
+                    item_type:
+                      type: NestedObject
+                      properties: []
+                  - name: message
+                    type: String
+                    description: |-
+                      A developer-facing error message, which should be in English. Any
+                      user-facing error message should be localized and sent in the
+                      google.rpc.Status.details field, or localized by the client.
+              - name: text
+                type: String
+                description: Text response.
+              - name: value
+                type: NestedObject
+                description: Fields and values that can be used to populate the response template.
+                properties: []
+          - name: prompt
+            type: NestedObject
+            description: |-
+              Prompt to be evaluated. This can represent a single-turn prompt or a
+              multi-turn conversation for agent evaluations.
+            properties:
+              - name: promptTemplateData
+                type: NestedObject
+                description: Message to hold a prompt template and the values to populate the template.
+                properties:
+                  - name: values
+                    type: Map
+                    description: The values for fields in the prompt template.
+                    value_type:
+                      type: NestedObject
+                      properties:
+                        - name: parts
+                          type: Array
+                          required: true
+                          description: |-
+                            A list of Part objects
+                            that make up a single message. Parts of a message can have different MIME
+                            types.
+
+                            A Content message must have at
+                            least one Part.
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: codeExecutionResult
+                                type: NestedObject
+                                description: |-
+                                  Result of executing the ExecutableCode.
+
+                                  Generated only when the `CodeExecution` tool is used.
+                                properties:
+                                  - name: outcome
+                                    type: String
+                                    required: true
+                                    description: |-
+                                      Outcome of the code execution.
+                                      Possible values:
+                                      OUTCOME_OK
+                                      OUTCOME_FAILED
+                                      OUTCOME_DEADLINE_EXCEEDED
+                                  - name: output
+                                    type: String
+                                    description: |-
+                                      Contains stdout when code execution is successful, stderr or other
+                                      description otherwise.
+                              - name: customMetadata
+                                type: KeyValuePairs
+                                description: Custom metadata for the part.
+                              - name: executableCode
+                                type: NestedObject
+                                description: |-
+                                  Code generated by the model that is meant to be executed, and the result
+                                  returned to the model.
+
+                                  Generated when using the `CodeExecution` tool, in which the code will
+                                  be automatically executed, and a corresponding CodeExecutionResult will
+                                  also be generated.
+                                properties:
+                                  - name: code
+                                    type: String
+                                    required: true
+                                    description: The code to be executed.
+                                  - name: language
+                                    type: String
+                                    required: true
+                                    description: |-
+                                      Programming language of the `code`.
+                                      Possible values:
+                                      PYTHON
+                                      BASH
+                              - name: fileData
+                                type: NestedObject
+                                description: |-
+                                  URI-based data.
+
+                                  A FileData message contains a URI
+                                  pointing to data of a specific media type. It is used to represent images,
+                                  audio, and video stored in Google Cloud Storage.
+                                properties:
+                                  - name: displayName
+                                    type: String
+                                    description: |-
+                                      The display name of the file. Used to provide a label or filename
+                                      to distinguish files.
+
+                                      This field is only returned in `PromptMessage` for prompt management. It is
+                                      used in the Gemini calls only when server side tools (`code_execution`,
+                                      `google_search`, and `url_context`) are enabled.
+                                  - name: fileUri
+                                    type: String
+                                    required: true
+                                    description: The URI of the file in Google Cloud Storage.
+                                  - name: mimeType
+                                    type: String
+                                    required: true
+                                    description: The IANA standard MIME type of the source data.
+                              - name: functionCall
+                                type: NestedObject
+                                description: |-
+                                  A predicted FunctionCall returned from the model that
+                                  contains a string representing the FunctionDeclaration.name and
+                                  a structured JSON object containing the parameters and their values.
+                                properties:
+                                  - name: args
+                                    type: KeyValuePairs
+                                    description: |-
+                                      The function parameters and values in JSON object format.
+                                      See FunctionDeclaration.parameters for parameter details.
+                                  - name: name
+                                    type: String
+                                    description: |-
+                                      The name of the function to call.
+                                      Matches FunctionDeclaration.name.
+                                  - name: partialArgs
+                                    type: Array
+                                    description: |-
+                                      The partial argument value of the function call.
+                                      If provided, represents the arguments/fields that are streamed
+                                      incrementally.
+                                    item_type:
+                                      type: NestedObject
+                                      properties:
+                                        - name: boolValue
+                                          type: Boolean
+                                          description: Represents a boolean value.
+                                        - name: jsonPath
+                                          type: String
+                                          required: true
+                                          description: |-
+                                            A JSON Path (RFC 9535) to the argument being streamed.
+                                            https://datatracker.ietf.org/doc/html/rfc9535. e.g. "$.foo.bar[0].data".
+                                        - name: nullValue
+                                          type: String
+                                          description: |-
+                                            Possible values:
+                                            NULL_VALUE
+                                        - name: numberValue
+                                          type: Double
+                                          description: Represents a double value.
+                                        - name: stringValue
+                                          type: String
+                                          description: Represents a string value.
+                                        - name: willContinue
+                                          type: Boolean
+                                          description: |-
+                                            Whether this is not the last part of the same json_path.
+                                            If true, another PartialArg message for the current json_path is expected
+                                            to follow.
+                                  - name: willContinue
+                                    type: Boolean
+                                    description: |-
+                                      Whether this is the last part of the FunctionCall.
+                                      If true, another partial message for the current FunctionCall is expected
+                                      to follow.
+                              - name: functionResponse
+                                type: NestedObject
+                                description: |-
+                                  The result output from a FunctionCall that contains
+                                  a string representing the FunctionDeclaration.name and a structured
+                                  JSON object containing any output from the function is used as context to
+                                  the model. This should contain the result of a `FunctionCall` made based
+                                  on model prediction.
+                                properties:
+                                  - name: name
+                                    type: String
+                                    required: true
+                                    description: |-
+                                      The name of the function to call.
+                                      Matches FunctionDeclaration.name and FunctionCall.name.
+                                  - name: parts
+                                    type: Array
+                                    description: |-
+                                      Ordered `Parts` that constitute a function response. Parts may have
+                                      different IANA MIME types.
+                                    item_type:
+                                      type: NestedObject
+                                      properties:
+                                        - name: fileData
+                                          type: NestedObject
+                                          description: URI based data for function response.
+                                          properties:
+                                            - name: displayName
+                                              type: String
+                                              description: |-
+                                                Display name of the file data.
+
+                                                Used to provide a label or filename to distinguish file datas.
+
+                                                This field is only returned in PromptMessage for prompt management.
+                                                It is currently used in the Gemini GenerateContent calls only when server
+                                                side tools (code_execution, google_search, and url_context) are enabled.
+                                            - name: fileUri
+                                              type: String
+                                              required: true
+                                              description: URI.
+                                            - name: mimeType
+                                              type: String
+                                              required: true
+                                              description: The IANA standard MIME type of the source data.
+                                        - name: inlineData
+                                          type: NestedObject
+                                          description: |-
+                                            Raw media bytes for function response.
+
+                                            Text should not be sent as raw bytes, use the 'text' field.
+                                          properties:
+                                            - name: data
+                                              type: String
+                                              required: true
+                                              description: Raw bytes.
+                                            - name: displayName
+                                              type: String
+                                              description: |-
+                                                Display name of the blob.
+
+                                                Used to provide a label or filename to distinguish blobs.
+
+                                                This field is only returned in PromptMessage for prompt management.
+                                                It is currently used in the Gemini GenerateContent calls only when server
+                                                side tools (code_execution, google_search, and url_context) are enabled.
+                                            - name: mimeType
+                                              type: String
+                                              required: true
+                                              description: The IANA standard MIME type of the source data.
+                                        - name: retrievalResult
+                                          type: NestedObject
+                                          description: |-
+                                            Represents a retrieval result that is part of a `FunctionResponsePart`
+                                            message.
+                                          properties:
+                                            - name: annotations
+                                              type: KeyValuePairs
+                                              description: Other optional metadata about the result. This is not sent to the model.
+                                            - name: content
+                                              type: String
+                                              description: |-
+                                                The content (snippet) of the result. This will be sent to the model for
+                                                response generation.
+                                            - name: displayContent
+                                              type: String
+                                              description: |-
+                                                If set, this will be used in the output grounding metadata, instead of
+                                                the content field; otherwise, the content field will be used.
+                                                This field is never sent to the model.
+                                            - name: query
+                                              type: String
+                                              description: |-
+                                                The query that was used to retrieve the result. This provides extra context
+                                                as to what the result is about.
+                                            - name: title
+                                              type: String
+                                              description: |-
+                                                The title of the result. This will be sent to the model for response
+                                                generation.
+                                            - name: uri
+                                              type: String
+                                              description: The URI of the result.
+                                  - name: response
+                                    type: KeyValuePairs
+                                    required: true
+                                    description: |-
+                                      The function response in JSON object format.
+                                      Use "output" key to specify function output and "error" key to specify
+                                      error details (if any). If "output" and "error" keys are not specified,
+                                      then whole "response" is treated as function output.
+                                  - name: scheduling
+                                    type: String
+                                    description: |-
+                                      Specifies how the response should be scheduled in the conversation.
+                                      Only applicable to NON_BLOCKING function calls, is ignored otherwise.
+                                      Defaults to WHEN_IDLE.
+                                      Possible values:
+                                      SILENT
+                                      WHEN_IDLE
+                                      INTERRUPT
+                              - name: inlineData
+                                type: NestedObject
+                                description: |-
+                                  A content blob.
+
+                                  A Blob contains data of a specific
+                                  media type. It is used to represent images, audio, and video.
+                                properties:
+                                  - name: data
+                                    type: String
+                                    required: true
+                                    description: The raw bytes of the data.
+                                  - name: displayName
+                                    type: String
+                                    description: |-
+                                      The display name of the blob. Used to provide a label or filename
+                                      to distinguish blobs.
+
+                                      This field is only returned in `PromptMessage` for prompt management. It is
+                                      used in the Gemini calls only when server-side tools (`code_execution`,
+                                      `google_search`, and `url_context`) are enabled.
+                                  - name: mimeType
+                                    type: String
+                                    required: true
+                                    description: The IANA standard MIME type of the source data.
+                                  - name: willContinue
+                                    type: Boolean
+                                    description: |-
+                                      When set, indicates that the next message in a streaming
+                                      connection is to be interpreted as a continuation of this `Blob`. The next
+                                      message must contain only the
+                                      Content of the same role as the
+                                      one containing this `Part`, and must contain a single
+                                      Part with `inline_data` and the same
+                                      `mime_type` as this `Blob`.
+                              - name: mediaResolution
+                                type: NestedObject
+                                description: |-
+                                  per part media resolution.
+                                  Media resolution for the input media.
+                                properties:
+                                  - name: level
+                                    type: String
+                                    description: |-
+                                      The tokenization quality used for given media.
+                                      Possible values:
+                                      MEDIA_RESOLUTION_LOW
+                                      MEDIA_RESOLUTION_MEDIUM
+                                      MEDIA_RESOLUTION_HIGH
+                                      MEDIA_RESOLUTION_ULTRA_HIGH
+                                  - name: numTokens
+                                    type: Integer
+                                    description: Specifies the required sequence length for media tokenization.
+                              - name: text
+                                type: String
+                                description: |-
+                                  The text content of the part.
+                                  When sent from the VSCode Gemini Code Assist extension, references to
+                                  @mentioned items will be converted to markdown boldface text. For
+                                  example `@my-repo` will be converted to and sent as `**my-repo**` by
+                                  the IDE agent.
+                              - name: thought
+                                type: Boolean
+                                description: |-
+                                  Indicates whether the `part` represents the model's thought
+                                  process or reasoning.
+                              - name: thoughtSignature
+                                type: String
+                                description: |-
+                                  An opaque signature for the thought so it can be reused in
+                                  subsequent requests.
+                              - name: videoMetadata
+                                type: NestedObject
+                                description: |-
+                                  Provides metadata for a video, including the start and end offsets for
+                                  clipping and the frame rate.
+                                properties:
+                                  - name: endOffset
+                                    type: String
+                                    description: The end offset of the video.
+                                  - name: fps
+                                    type: Double
+                                    description: |-
+                                      The frame rate of the video sent to the model. If not specified,
+                                      the default value is 1.0. The valid range is (0.0, 24.0].
+                                  - name: startOffset
+                                    type: String
+                                    description: The start offset of the video.
+                        - name: role
+                          type: String
+                          description: |-
+                            The producer of the content. Must be either 'user' or 'model'.
+
+                            If not set, the service will default to 'user'.
+                    key_name: 'name'
+              - name: text
+                type: String
+                description: Text prompt.
+              - name: value
+                type: NestedObject
+                description: Fields and values that can be used to populate the prompt template.
+                properties: []
+          - name: rubrics
+            type: Map
+            description: |-
+              Named groups of rubrics associated with this prompt.
+              The key is a user-defined name for the rubric group.
+            value_type:
+              type: NestedObject
+              properties:
+                - name: displayName
+                  type: String
+                  description: |-
+                    Human-readable name for the group. This should be unique
+                    within a given context if used for display or selection.
+                    Example: "Instruction Following V1", "Content Quality - Summarization
+                    Task".
+                - name: groupId
+                  type: String
+                  description: Unique identifier for the group.
+                - name: rubrics
+                  type: Array
+                  description: Rubrics that are part of this group.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: content
+                        type: NestedObject
+                        description: Content of the rubric, defining the testable criteria.
+                        properties:
+                          - name: property
+                            type: NestedObject
+                            description: Defines criteria based on a specific property.
+                            properties:
+                              - name: description
+                                type: String
+                                description: |-
+                                  Description of the property being evaluated.
+                                  Example: "The model's response is grammatically correct."
+                      - name: importance
+                        type: String
+                        description: |-
+                          The relative importance of this rubric.
+                          Possible values:
+                          HIGH
+                          MEDIUM
+                          LOW
+                      - name: rubricId
+                        type: String
+                        description: |-
+                          Unique identifier for the rubric.
+                          This ID is used to refer to this rubric, e.g., in RubricVerdict.
+                      - name: type
+                        type: String
+                        description: |-
+                          A type designator for the rubric, which can inform how it's
+                          evaluated or interpreted by systems or users.
+                          It's recommended to use consistent, well-defined, upper snake_case strings.
+                          Examples: "SUMMARIZATION_QUALITY", "SAFETY_HARMFUL_CONTENT",
+                          "INSTRUCTION_ADHERENCE".
+            key_name: 'name'
+  - name: gcsUri
+    type: String
+    description: The Cloud Storage object where the request or response is stored.
+  - name: labels
+    type: KeyValueLabels
+    description: Labels for the EvaluationItem.
+  - name: metadata
+    type: KeyValuePairs
+    description: Metadata for the EvaluationItem.
+  - name: name
+    type: String
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+    description: |-
+      Identifier. The resource name of the EvaluationItem.
+      Format:
+      `projects/{project}/locations/{location}/evaluationItems/{evaluation_item}`
+    output: true
